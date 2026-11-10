@@ -12,11 +12,11 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="color-scheme" content="dark">
 <title>Clap</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22></text></svg>">
 <style>
   :root{
     --bg:#000000; --panel:#0d0d0d; --panel2:#181818; --line:#2a2a2a;
-    --text:#e9eef2; --muted:#9ab; --accent:#00e054; --accent2:#ef4444; --on:#0d1a12;
+    --text:#e9eef2; --muted:#9ab; --accent:#dc2626; --accent2:#f97316; --on:#ffffff;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
@@ -82,9 +82,6 @@
   .j-title{font-weight:700}
   .j-stars{color:var(--accent);letter-spacing:2px;font-size:15px}
   .j-review{margin:6px 0 0;color:#cfd8df;font-size:14px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap}
-  .swatches{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px}
-  .sw{width:34px;height:34px;border-radius:50%;padding:0;border:2px solid transparent}.sw.on{border-color:#fff}
-  input[type=color]{width:44px;height:34px;padding:0;border:none;background:none;border-radius:8px}
   .strip{display:flex;gap:6px;overflow-x:auto;margin:6px 0 10px;scrollbar-width:none}.strip img{height:84px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;cursor:pointer;flex:0 0 auto}
   .vtoggle button.on{background:var(--accent);border-color:var(--accent);color:var(--on);font-weight:700}
   .home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
@@ -123,7 +120,7 @@
   /* ===== Clap+ ===== */
   .prov{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;min-height:26px}
   .plogo{width:26px;height:26px;border-radius:7px;object-fit:cover;opacity:.55}
-  .plogo.mine{opacity:1;outline:2px solid #22c55e}
+  .plogo.mine{opacity:1;outline:2px solid var(--accent)}
   .prov.big .plogo{width:38px;height:38px}
   .pmine{font-size:12px;color:#86efac}
   body.only-mine [data-avail="0"]{display:none !important}
@@ -163,9 +160,6 @@
     #mainTabs .tab-btn i{font-size:18px}
   }
 </style>
-<script>
-try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){var r=document.documentElement.style;r.setProperty('--accent',a);var n=parseInt(a.slice(1),16),l=(0.299*(n>>16)+0.587*((n>>8)&255)+0.114*(n&255));r.setProperty('--on',l>150?'#0d1a12':'#ffffff');}}catch(e){}
-</script>
 </head>
 <body>
 
@@ -180,8 +174,8 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
   <!-- DÉCOUVRIR -->
   <section id="discover" class="tab-content active">
     <div class="section search-wrap" id="searchWrap">
-      <span class="search-ico" aria-hidden="true">🔍</span>
-      <input id="searchInput" type="text" placeholder="Rechercher un film, une série, un acteur…" autocomplete="off" enterkeyhint="search"
+      <span class="search-ico" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span>
+      <input id="searchInput" type="text" placeholder="Film, série, acteur…" autocomplete="off" enterkeyhint="search"
              oninput="handleSearchInput()" onfocus="showRecents()" onkeydown="handleSearchKeydown(event)">
       <button type="button" id="searchClear" class="search-clear" onclick="clearSearch()" aria-label="Effacer la recherche">✕</button>
       <div id="searchSuggestions"></div>
@@ -192,21 +186,21 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
     <div id="goalsMini"></div>
     <div id="resume"></div>
     <div id="reminders"></div>
-    <label class="toggleRow"><input type="checkbox" class="onlyMineToggle" onchange="toggleOnlyMine(this.checked)"> 📺 Seulement mes plateformes</label>
+    <label class="toggleRow"><input type="checkbox" class="onlyMineToggle" onchange="toggleOnlyMine(this.checked)"> Seulement mes plateformes</label>
 
     <div class="section">
-      <div class="row" style="margin-bottom:12px"><h2 style="margin:0;flex:1">✨ Pour toi</h2><button onclick="loadRecommendations(true)">↻ Autres idées</button></div>
+      <div class="row" style="margin-bottom:12px"><h2 style="margin:0;flex:1">Pour toi</h2><button onclick="loadRecommendations(true)">↻ Autres idées</button></div>
       <div id="recoList" class="home-grid"></div>
     </div>
 
-    <div class="section"><h2>🔥 Films tendance</h2><div id="trendingMovies" class="home-grid"></div></div>
-    <div class="section"><h2>📺 Séries tendance</h2><div id="trendingSeries" class="home-grid"></div></div>
-    <div class="section"><h2>🆕 Nouveaux films</h2><div id="newMovies" class="home-grid"></div></div>
-    <div class="section"><h2>🆕 Nouvelles séries</h2><div id="newSeries" class="home-grid"></div></div>
-    <div class="section"><h2>🎌 Animes populaires</h2><div id="animeSeries" class="home-grid"></div></div>
-    <div class="section"><h2>🎞️ Films d’animation japonais</h2><div id="animeMovies" class="home-grid"></div></div>
+    <div class="section"><h2>Films tendance</h2><div id="trendingMovies" class="home-grid"></div></div>
+    <div class="section"><h2>Séries tendance</h2><div id="trendingSeries" class="home-grid"></div></div>
+    <div class="section"><h2>Nouveaux films</h2><div id="newMovies" class="home-grid"></div></div>
+    <div class="section"><h2>Nouvelles séries</h2><div id="newSeries" class="home-grid"></div></div>
+    <div class="section"><h2>Animes populaires</h2><div id="animeSeries" class="home-grid"></div></div>
+    <div class="section"><h2>Films d’animation japonais</h2><div id="animeMovies" class="home-grid"></div></div>
     <div class="section">
-      <div class="row" style="margin-bottom:6px"><h2 style="margin:0;flex:1">🏛️ Classiques (AFI 100)</h2><select id="afiCat" onchange="loadAFI()" style="width:auto"></select></div>
+      <div class="row" style="margin-bottom:6px"><h2 style="margin:0;flex:1">Classiques (AFI 100)</h2><select id="afiCat" onchange="loadAFI()" style="width:auto"></select></div>
       <p id="afiInfo" class="small" style="margin:0 0 10px"></p>
       <div id="afiList" class="home-grid"></div>
     </div>
@@ -215,7 +209,7 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
   <!-- VUS -->
   <section id="watched" class="tab-content">
     <div class="row section">
-      <h2 style="margin:0;flex:1">📖 Journal</h2>
+      <h2 style="margin:0;flex:1">Journal</h2>
       <span class="vtoggle row" style="gap:4px"><button data-act="wview" data-v="journal">Journal</button><button data-act="wview" data-v="list">Liste</button></span>
       <select id="watchedSort" onchange="renderWatched()" style="width:auto">
         <option value="addedAt">Plus récents</option>
@@ -229,23 +223,23 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
   <!-- À VOIR + LISTES -->
   <section id="watchlist-tab" class="tab-content">
     <div class="row section">
-      <h2 style="margin:0;flex:1">📝 À voir</h2>
+      <h2 style="margin:0;flex:1">À voir</h2>
       <select id="watchlistSort" onchange="renderWatchlist()" style="width:auto">
         <option value="addedAt">Plus récents</option>
         <option value="title">Titre A→Z</option>
         <option value="rating">Envie</option>
       </select>
-      <button class="primary" onclick="pickRandomFromWatchlist()">🎲 Au hasard</button>
+      <button class="primary" onclick="pickRandomFromWatchlist()">Au hasard</button>
     </div>
     <div class="row section" style="margin-top:-12px">
-      <label class="toggleRow" style="flex:1"><input type="checkbox" class="onlyMineToggle" onchange="toggleOnlyMine(this.checked)"> 📺 Seulement mes plateformes</label>
-      <button onclick="shareList('watchlist')">🔗 Partager ma watchlist</button>
+      <label class="toggleRow" style="flex:1"><input type="checkbox" class="onlyMineToggle" onchange="toggleOnlyMine(this.checked)"> Seulement mes plateformes</label>
+      <button onclick="shareList('watchlist')">Partager ma watchlist</button>
     </div>
     <div id="watchlistRandomResult" class="section"></div>
     <div id="watchlist"></div>
 
     <div class="card section" style="margin-top:28px">
-      <h2>👥 Choisir à plusieurs</h2>
+      <h2>Choisir à plusieurs</h2>
       <p class="small">Chacun son tour, on se passe le téléphone et on vote. Le film le plus voté gagne.</p>
       <label>Parmi quelle liste ?</label>
       <select id="voteSource"></select>
@@ -257,7 +251,7 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
     </div>
 
     <div class="section">
-      <h2>🗂️ Mes listes</h2>
+      <h2>Mes listes</h2>
       <div class="row" style="margin-bottom:12px">
         <input id="customListName" type="text" placeholder="Nom de la nouvelle liste" style="flex:1;width:auto">
         <button class="primary" onclick="createCustomList()">Créer</button>
@@ -272,7 +266,7 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
       <select id="seriesFilter" onchange="renderSeries()" style="width:auto;margin-bottom:12px">
         <option value="all">Séries et animes</option>
         <option value="series">Séries</option>
-        <option value="anime">🎌 Animes</option>
+        <option value="anime">Animes</option>
       </select>
       <div id="seriesList"></div>
     </div>
@@ -280,12 +274,12 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
 
   <!-- À VENIR -->
   <section id="upcoming" class="tab-content">
-    <h2>📅 À venir</h2>
+    <h2>À venir</h2>
     <div id="upFilters" class="row" style="margin-bottom:10px">
       <button class="fchip" data-act="upFilter" data-v="all">Tout</button>
-      <button class="fchip" data-act="upFilter" data-v="movie">🎬 Films</button>
-      <button class="fchip" data-act="upFilter" data-v="series">📺 Séries</button>
-      <button class="fchip" data-act="upFilter" data-v="anime">🎌 Animes</button>
+      <button class="fchip" data-act="upFilter" data-v="movie">Films</button>
+      <button class="fchip" data-act="upFilter" data-v="series">Séries</button>
+      <button class="fchip" data-act="upFilter" data-v="anime">Animes</button>
     </div>
     <div class="row section">
       <select id="upRange" onchange="setUpcoming()" style="width:auto">
@@ -301,7 +295,7 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
   <!-- HASARD -->
   <section id="random" class="tab-content">
     <div class="card section">
-      <h2>🎲 Que regarder ?</h2>
+      <h2>Que regarder ?</h2>
       <label>Mode</label>
       <select id="randomMode" onchange="toggleRandomMode()">
         <option value="genre">Par genre</option>
@@ -335,10 +329,10 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
           </select></div>
       </div>
 
-      <label class="toggleRow"><input type="checkbox" class="onlyMineToggle" onchange="toggleOnlyMine(this.checked)"> 📺 Seulement mes plateformes</label>
+      <label class="toggleRow"><input type="checkbox" class="onlyMineToggle" onchange="toggleOnlyMine(this.checked)"> Seulement mes plateformes</label>
       <div class="buttons">
         <button class="primary" onclick="pickRandomMovie()">Tirer un film</button>
-        <button onclick="pickMovieOfTheNight()">🎬 Film du soir</button>
+        <button onclick="pickMovieOfTheNight()">Film du soir</button>
       </div>
     </div>
     <div id="randomResult" class="section"></div>
@@ -347,14 +341,14 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
 
   <!-- STATS -->
   <section id="stats" class="tab-content">
-    <h2>📊 Statistiques</h2>
+    <h2>Statistiques</h2>
     <div class="card section">
-      <h3>🎯 Mes objectifs <span id="goalYear"></span></h3>
+      <h3>Mes objectifs <span id="goalYear"></span></h3>
       <p class="small">Mets 0 pour désactiver un objectif. Séries et animes comptent les épisodes vus cette année (à partir d’aujourd’hui).</p>
       <div class="grid2">
-        <div><label>🎬 Films</label><input id="goalFilms" type="number" min="0" inputmode="numeric" placeholder="ex. 500" onchange="setGoal()"></div>
-        <div><label>📺 Épisodes de séries</label><input id="goalSeries" type="number" min="0" inputmode="numeric" placeholder="ex. 200" onchange="setGoal()"></div>
-        <div><label>🎌 Épisodes d’animes</label><input id="goalAnime" type="number" min="0" inputmode="numeric" placeholder="ex. 300" onchange="setGoal()"></div>
+        <div><label>Films</label><input id="goalFilms" type="number" min="0" inputmode="numeric" placeholder="ex. 500" onchange="setGoal()"></div>
+        <div><label>Épisodes de séries</label><input id="goalSeries" type="number" min="0" inputmode="numeric" placeholder="ex. 200" onchange="setGoal()"></div>
+        <div><label>Épisodes d’animes</label><input id="goalAnime" type="number" min="0" inputmode="numeric" placeholder="ex. 300" onchange="setGoal()"></div>
       </div>
       <div id="goalsBars" style="margin-top:12px"></div>
     </div>
@@ -372,7 +366,7 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
       <div class="card"><h3>Mes notes</h3><div class="chart-box"><canvas id="ratingChart"></canvas></div></div>
     </div>
     <div class="card section">
-      <h3>🎞️ Mon bilan</h3>
+      <h3>Mon bilan</h3>
       <p class="small">Une image à partager avec tes stats, tes genres et tes coups de cœur.</p>
       <div class="row">
         <select id="recapYear" style="width:auto"></select>
@@ -380,11 +374,11 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
       </div>
       <canvas id="recapCanvas"></canvas>
       <div id="recapActions">
-        <button onclick="downloadRecap()">⬇️ Télécharger</button>
-        <button class="primary" onclick="shareRecap()">📤 Partager</button>
+        <button onclick="downloadRecap()">Télécharger</button>
+        <button class="primary" onclick="shareRecap()">Partager</button>
       </div>
     </div>
-    <div class="card"><h3>🏅 Badges</h3><p class="small">Touche un badge pour voir l'objectif.</p><div id="statsBadges"></div></div>
+    <div class="card"><h3>Badges</h3><p class="small">Touche un badge pour voir l'objectif.</p><div id="statsBadges"></div></div>
   </section>
 
   <!-- PROFIL -->
@@ -399,7 +393,7 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
       <label>Photo de profil</label>
       <input id="profileAvatarFile" type="file" accept="image/*" onchange="handleAvatarUpload()">
       <label style="display:flex;gap:10px;align-items:center;margin-top:16px;color:var(--text);font-size:15px">
-        <input type="checkbox" id="soundToggle" onchange="toggleSound()" style="width:auto"> 🔔 Cloche quand un badge se débloque
+        <input type="checkbox" id="soundToggle" onchange="toggleSound()" style="width:auto"> Cloche quand un badge se débloque
       </label>
     </div>
 
@@ -408,62 +402,56 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
       <div class="card stat"><b id="favoriteSeriesCount">0</b><span class="small">Séries favorites</span></div>
       <div class="card stat"><b id="favoritePeopleCount">0</b><span class="small">Acteurs favoris</span></div>
     </div>
-    <div class="section"><h3>🎭 Acteurs favoris</h3><div id="favoritePeopleList"></div></div>
+    <div class="section"><h3>Acteurs favoris</h3><div id="favoritePeopleList"></div></div>
 
     <div class="card section">
-      <h3>📺 Mes plateformes</h3>
+      <h3>Mes plateformes</h3>
       <p class="small">Choisis tes abonnements : tu verras ce qui est dispo chez toi, et tu pourras filtrer.</p>
       <div id="providerPicker"></div>
     </div>
 
     <div class="card section">
-      <h3>🔔 Rappels</h3>
+      <h3>Rappels</h3>
       <label class="toggleRow"><input type="checkbox" id="notifToggle" onchange="toggleNotif(this.checked)"> Me prévenir des sorties (aujourd’hui / demain)</label>
       <p class="small">Les rappels s’affichent dans l’appli, et en notification quand tu l’ouvres. Pour les recevoir appli fermée, il faudrait un serveur.</p>
     </div>
 
     <div class="card section">
-      <h3>🤝 Partager mes goûts</h3>
+      <h3>Partager mes goûts</h3>
       <p class="small">Envoie un lien à un ami : il verra votre compatibilité et les films que tu as adorés.</p>
-      <div class="buttons"><button class="primary" onclick="shareTaste()">🔗 Partager mon profil ciné</button></div>
+      <div class="buttons"><button class="primary" onclick="shareTaste()">Partager mon profil ciné</button></div>
     </div>
 
     <div class="card section">
-      <h3>📥 Importer de Letterboxd</h3>
+      <h3>Importer de Letterboxd</h3>
       <p class="small">Sur Letterboxd : Paramètres → Import & Export → Exporter. Choisis ici <b>watched.csv</b>, <b>ratings.csv</b> et/ou <b>watchlist.csv</b> (ou un CSV avec colonnes Name / Year / Rating).</p>
       <input id="csvFiles" type="file" accept=".csv,text/csv" multiple onchange="importCSV(this)">
       <div id="importStatus" class="small" style="margin-top:8px"></div>
     </div>
 
     <div class="card section">
-      <h3>📤 Exporter vers Letterboxd</h3>
+      <h3>Exporter vers Letterboxd</h3>
       <p class="small">Télécharge un CSV, puis sur Letterboxd : <b>letterboxd.com/import</b> → choisis le fichier. La watchlist s'importe comme liste (puis coche « Ajouter à ma watchlist » si proposé, ou utilise-la comme liste). Seuls les films sont exportés (pas les séries).</p>
       <div class="buttons">
-        <button class="primary" onclick="exportLetterboxd('watchlist')">📋 Ma watchlist</button>
-        <button onclick="exportLetterboxd('watched')">🎞️ Mes films vus</button>
-        <button onclick="exportPosters('watchlist')">🖼️ Watchlist avec affiches</button>
-        <button onclick="exportPosters('watched')">🖼️ Vus avec affiches</button>
+        <button class="primary" onclick="exportLetterboxd('watchlist')">Ma watchlist</button>
+        <button onclick="exportLetterboxd('watched')">Mes films vus</button>
+        <button onclick="exportPosters('watchlist')">Watchlist avec affiches</button>
+        <button onclick="exportPosters('watched')">Vus avec affiches</button>
       </div>
     </div>
 
     <div class="card section">
-      <h3>🎨 Couleur de l’appli</h3>
-      <p class="small">Choisis la couleur des boutons et des accents.</p>
-      <div class="swatches" id="swatches"></div>
-    </div>
-
-    <div class="card section">
-      <h3>🧹 Nettoyer mes données</h3>
+      <h3>Nettoyer mes données</h3>
       <p class="small">Un souci après un import ? Tu peux tout vider, ou revenir en arrière juste après.</p>
       <div class="buttons">
-        <button type="button" data-act="clearWatchlist">🗑️ Vider ma watchlist</button>
-        <button type="button" data-act="clearWatched">🗑️ Vider mes films vus</button>
+        <button type="button" data-act="clearWatchlist">Vider ma watchlist</button>
+        <button type="button" data-act="clearWatched">Vider mes films vus</button>
       </div>
       <div id="undoBox" style="margin-top:10px"></div>
     </div>
 
     <div class="card">
-      <h3>💾 Sauvegarde</h3>
+      <h3>Sauvegarde</h3>
       <p class="small">Tes données sont stockées dans ce navigateur. Exporte-les pour ne rien perdre.</p>
       <div class="buttons">
         <button class="primary" onclick="exportData()">Exporter</button>
@@ -476,14 +464,14 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
 </main>
 
 <nav id="mainTabs">
-  <button class="tab-btn active" data-tab="discover" onclick="showTab('discover', this)"><i>🔥</i>Découvrir</button>
-  <button class="tab-btn" data-tab="watched" onclick="showTab('watched', this)"><i>✅</i>Vus</button>
-  <button class="tab-btn" data-tab="watchlist-tab" onclick="showTab('watchlist-tab', this)"><i>📝</i>À voir</button>
-  <button class="tab-btn" data-tab="series" onclick="showTab('series', this)"><i>📺</i>Séries</button>
-  <button class="tab-btn" data-tab="upcoming" onclick="showTab('upcoming', this)"><i>📅</i>À venir</button>
-  <button class="tab-btn" data-tab="random" onclick="showTab('random', this)"><i>🎲</i>Hasard</button>
-  <button class="tab-btn" data-tab="stats" onclick="showTab('stats', this)"><i>📊</i>Stats</button>
-  <button class="tab-btn" data-tab="profile" onclick="showTab('profile', this)"><i>👤</i>Profil</button>
+  <button class="tab-btn active" data-tab="discover" onclick="showTab('discover', this)">Découvrir</button>
+  <button class="tab-btn" data-tab="watched" onclick="showTab('watched', this)">Vus</button>
+  <button class="tab-btn" data-tab="watchlist-tab" onclick="showTab('watchlist-tab', this)">À voir</button>
+  <button class="tab-btn" data-tab="series" onclick="showTab('series', this)">Séries</button>
+  <button class="tab-btn" data-tab="upcoming" onclick="showTab('upcoming', this)">À venir</button>
+  <button class="tab-btn" data-tab="random" onclick="showTab('random', this)">Hasard</button>
+  <button class="tab-btn" data-tab="stats" onclick="showTab('stats', this)">Stats</button>
+  <button class="tab-btn" data-tab="profile" onclick="showTab('profile', this)">Profil</button>
 </nav>
 
 

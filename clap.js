@@ -6,7 +6,7 @@
 
 const IMG = 'https://image.tmdb.org/t/p/w500';
 // Clé v3 (courte) OU "Read Access Token" v4 (long, envoyé en Bearer)
-const CLAP_VERSION = 27; // doit être identique dans clap-plus.js
+const CLAP_VERSION = 28; // doit être identique dans clap-plus.js
 const TMDB_KEY = 'f1de9e030815c6b8ffcc131f2d144956';
 
 const GENRES = [
@@ -53,7 +53,7 @@ function getStorage(key, fallback) {
 }
 function setStorage(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); }
-  catch (e) { console.warn('Stockage plein ou indisponible', e); toast('⚠️ Sauvegarde impossible (stockage plein)'); }
+  catch (e) { console.warn('Stockage plein ou indisponible', e); toast('Sauvegarde impossible (stockage plein)'); }
 }
 
 function normalizeLegacySeries(list) {
@@ -288,7 +288,6 @@ function showRecents() {
   searchActive = -1;
   box.innerHTML = recentSearches.map(r => `
     <div class="search-suggestion-item sug-row" data-act="pickSuggestion" data-title="${esc(r)}">
-      <span class="sug-ico">🕘</span>
       <div class="sug-grow"><div class="suggestion-title">${esc(r)}</div></div>
       <button type="button" class="sug-x" data-act="rmRecent" data-q="${esc(r)}" aria-label="Supprimer de l’historique">✕</button>
     </div>`).join('');
@@ -435,8 +434,8 @@ function renderSearchCard(raw) {
         <div>
           <span class="badge">${mediaTypeLabel(type)}</span>
           ${!isPerson ? `<span class="badge">${yearOf(item)}</span>` : ''}
-          ${animeOf(item) ? '<span class="badge">🎌 Anime</span>' : ''}
-          ${item.vote_average ? `<span class="badge">⭐ ${Number(item.vote_average).toFixed(1)}</span>` : ''}
+          ${animeOf(item) ? '<span class="badge">Anime</span>' : ''}
+          ${item.vote_average ? `<span class="badge">★ ${Number(item.vote_average).toFixed(1)}</span>` : ''}
         </div>
         <p class="small" style="margin-top:10px;">${esc(overview)}</p>
         ${!isPerson ? provSlot(item) : ''}
@@ -449,7 +448,7 @@ function renderSearchCard(raw) {
             ${type === 'tv' ? btn('follow', 'Suivre la série', ref(item)) : ''}
             ${listSelect(item)}
           ` : ''}
-          ${isPerson ? btn('person', '🎬 Ses films', { id: item.id, name: titleOf(item) }) : ''}
+          ${isPerson ? btn('person', 'Ses films', { id: item.id, name: titleOf(item) }) : ''}
           ${favBtn(item)}
         </div>
       </div>
@@ -524,7 +523,7 @@ function renderHomeList(containerId, items, mediaType, reasons) {
         <img class="home-mini-poster" loading="lazy" src="${poster(item.poster_path)}" alt="${esc(titleOf(item))}">
         <div>
           <div><strong>${esc(titleOf(item))}</strong></div>
-          <div class="small">${yearOf(item)} ${item.vote_average ? `· ⭐ ${Number(item.vote_average).toFixed(1)}` : ''}</div>
+          <div class="small">${yearOf(item)} ${item.vote_average ? `· ★ ${Number(item.vote_average).toFixed(1)}` : ''}</div>
           ${reasons?.get(item.id) ? `<div class="small">${esc(reasons.get(item.id))}</div>` : ''}
           ${provSlot(item)}
           <div class="buttons" style="margin-top:8px;">
@@ -550,7 +549,7 @@ function addWatched(item) {
   if (!watchedMovies.some(m => m.id === movie.id && typeOf(m) === typeOf(movie))) watchedMovies.unshift(movie);
   watchlist = watchlist.filter(m => m.id !== movie.id);
   saveAll();
-  toast(`✅ « ${movie.title} » ajouté aux vus`);
+  toast(`« ${movie.title} » ajouté aux vus`);
 }
 
 function addWatchlist(item) {
@@ -566,7 +565,7 @@ function addWatchlist(item) {
   }
   watchlist.unshift(movie);
   saveAll();
-  toast(`📝 « ${movie.title} » ajouté à ta watchlist`);
+  toast(`« ${movie.title} » ajouté à ta watchlist`);
 }
 
 function removeWatched(id) { watchedMovies = watchedMovies.filter(m => m.id !== id); saveAll(); }
@@ -596,7 +595,7 @@ function renderWatched() {
   if (!box) return;
   document.querySelectorAll('[data-act="wview"]').forEach(b => b.classList.toggle('on', b.dataset.v === watchedView));
   if ($('watchedSort')) $('watchedSort').style.display = watchedView === 'list' ? '' : 'none';
-  if (!watchedMovies.length) { box.innerHTML = '<div class="empty">Ton journal est vide pour l’instant 🍿<br>Marque un film comme « Vu » et il apparaîtra ici, avec sa date.</div>'; return; }
+  if (!watchedMovies.length) { box.innerHTML = '<div class="empty">Ton journal est vide pour l’instant<br>Marque un film comme « Vu » et il apparaîtra ici, avec sa date.</div>'; return; }
   if (watchedView === 'journal') { renderJournal(box); return; }
 
   box.innerHTML = sortItems(watchedMovies, $('watchedSort')?.value || 'addedAt').map(movie => `
@@ -609,7 +608,7 @@ function renderWatched() {
       <p class="small" style="margin-top:10px;">Ta note : <strong>${movie.rating ? movie.rating + '/5' : 'Non noté'}</strong></p>
       ${movie.review ? `<p class="j-review">${esc(movie.review)}</p>` : ''}
       <div class="buttons">
-        ${btn('review', '✍️ Critique', { id: movie.id })}
+        ${btn('review', 'Critique', { id: movie.id })}
         ${btn('details', 'Détails', ref(movie))}
         ${btn('share', 'Partager', ref(movie))}
         ${btn('rmWatched', 'Retirer', { id: movie.id })}
@@ -765,7 +764,7 @@ async function addSeries(item) {
       selectedSeason: seasons.length ? seasons[0].seasonNumber : 1
     });
     saveAll();
-    toast(`📺 « ${item.name || item.title} » suivie`);
+    toast(`« ${item.name || item.title} » suivie`);
   } catch (err) {
     console.error(err);
     toast("Impossible d'ajouter cette série.");
@@ -874,7 +873,7 @@ function renderSeries() {
                         ${ep.airDate ? `<div class="small">Diffusion : ${formatDate(ep.airDate)}</div>` : ''}
                       </div>
                       <div class="buttons" style="margin-top:0;">
-                        ${btn('epToggle', ep.watched ? '✅ Vu' : '⬜ Pas vu', e)}
+                        ${btn('epToggle', ep.watched ? 'Vu' : 'Pas vu', e)}
                         ${btn('epUntil', 'Vu jusqu’à cet épisode', e)}
                       </div>
                     </div>
@@ -890,7 +889,7 @@ function renderSeries() {
       <div class="card" style="margin-bottom:12px;">
         <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap;">
           <div>
-            <h3>${esc(series.name)}${series.isAnime ? ' 🎌' : ''}</h3>
+            <h3>${esc(series.name)}${series.isAnime ? '' : ''}</h3>
             <p class="small">
               ${stats.watchedCount}/${stats.totalCount} épisodes vus · ${esc(series.status)}
               ${stats.avgRating ? ` · Note moyenne épisodes : ${stats.avgRating}/5` : ''}
@@ -966,37 +965,37 @@ function renderMovieCalendar() {
 
 /* ---------- Badges & stats ---------- */
 const BADGE_DESCRIPTIONS = {
-  '🎬 Premier clap': 'Regarder 1 film',
-  '🍿 Habitué du canapé': 'Regarder 10 films',
-  '📽️ Binge-watcher': 'Regarder 20 films',
-  '🏆 Monstre du grand écran': 'Regarder 50 films',
-  '🔪 Amateur de thrillers': 'Voir 5 thrillers',
-  '👻 Enfant de minuit': 'Voir 5 films d\'horreur',
-  '😂 Maître du rire': 'Voir 5 comédies',
-  '🚀 Voyageur spatial': 'Voir 5 films de science-fiction',
-  '⚔️ Cœur d\'action': 'Voir 5 films d\'action',
-  '💘 Cœur tendre': 'Voir 5 romances',
-  '🕵️ Détective du dimanche': 'Voir 5 films de mystère',
-  '🏛️ Roi des classiques': 'Voir 5 films sortis avant 2000',
-  '📼 Nostalgique VHS': 'Voir 5 films des années 80/90',
-  '🎞️ Cinéphile curieux': 'Regarder des films de 10 années différentes',
-  '🧭 Explorateur cinéma': 'Voir des films de 8 genres différents',
-  '📺 Sériephile': 'Suivre 3 séries',
-  '📡 Accro aux épisodes': 'Suivre 5 séries',
-  '⏭️ Marathonien': 'Voir 50 épisodes',
-  '✅ Finisher': 'Terminer 3 séries',
-  '📝 Collectionneur': 'Ajouter 20 titres à la watchlist',
-  '🎯 Toujours prêt': 'Avoir 10 films dans la watchlist',
-  '🗂️ Curateur': 'Créer 3 listes personnalisées',
-  '⭐ Goût affirmé': 'Noter 10 films',
-  '🌟 Fan absolu': 'Ajouter 5 favoris',
-  '🎭 Fidèle au casting': 'Ajouter 3 acteurs/réalisateurs en favoris',
-  '🪞 Signature perso': 'Remplir ton profil local',
-  '🌙 Vu ce soir': 'Utiliser le bouton "Vu ce soir" 3 fois',
-  '📆 Régulier': 'Avoir une activité sur 7 jours différents',
-  '🔥 En feu': 'Voir 5 films en une semaine',
-  '🦍 Regelegorilla': '🤫 Badge secret : avoir vu les 100 films classiques de l’AFI',
-  '👑 Identité ciné': 'Débloquer 5 badges'
+  'Premier clap': 'Regarder 1 film',
+  'Habitué du canapé': 'Regarder 10 films',
+  'Binge-watcher': 'Regarder 20 films',
+  'Monstre du grand écran': 'Regarder 50 films',
+  'Amateur de thrillers': 'Voir 5 thrillers',
+  'Enfant de minuit': 'Voir 5 films d\'horreur',
+  'Maître du rire': 'Voir 5 comédies',
+  'Voyageur spatial': 'Voir 5 films de science-fiction',
+  'Cœur d\'action': 'Voir 5 films d\'action',
+  'Cœur tendre': 'Voir 5 romances',
+  'Détective du dimanche': 'Voir 5 films de mystère',
+  'Roi des classiques': 'Voir 5 films sortis avant 2000',
+  'Nostalgique VHS': 'Voir 5 films des années 80/90',
+  'Cinéphile curieux': 'Regarder des films de 10 années différentes',
+  'Explorateur cinéma': 'Voir des films de 8 genres différents',
+  'Sériephile': 'Suivre 3 séries',
+  'Accro aux épisodes': 'Suivre 5 séries',
+  'Marathonien': 'Voir 50 épisodes',
+  'Finisher': 'Terminer 3 séries',
+  'Collectionneur': 'Ajouter 20 titres à la watchlist',
+  'Toujours prêt': 'Avoir 10 films dans la watchlist',
+  'Curateur': 'Créer 3 listes personnalisées',
+  '★ Goût affirmé': 'Noter 10 films',
+  'Fan absolu': 'Ajouter 5 favoris',
+  'Fidèle au casting': 'Ajouter 3 acteurs/réalisateurs en favoris',
+  'Signature perso': 'Remplir ton profil local',
+  'Vu ce soir': 'Utiliser le bouton "Vu ce soir" 3 fois',
+  'Régulier': 'Avoir une activité sur 7 jours différents',
+  'En feu': 'Voir 5 films en une semaine',
+  'Regelegorilla': 'Badge secret : avoir vu les 100 films classiques de l’AFI',
+  'Identité ciné': 'Débloquer 5 badges'
 };
 
 function genreCountsOfWatched() {
@@ -1016,44 +1015,44 @@ function calculateBadges() {
   const g = genreCountsOfWatched();
   const year = m => parseInt(m.release_date?.slice(0, 4)) || null;
 
-  add(watchedMovies.length >= 1, '🎬 Premier clap');
-  add(watchedMovies.length >= 10, '🍿 Habitué du canapé');
-  add(watchedMovies.length >= 20, '📽️ Binge-watcher');
-  add(watchedMovies.length >= 50, '🏆 Monstre du grand écran');
+  add(watchedMovies.length >= 1, 'Premier clap');
+  add(watchedMovies.length >= 10, 'Habitué du canapé');
+  add(watchedMovies.length >= 20, 'Binge-watcher');
+  add(watchedMovies.length >= 50, 'Monstre du grand écran');
 
-  add((g['Thriller'] || 0) >= 5, '🔪 Amateur de thrillers');
-  add((g['Horreur'] || 0) >= 5, '👻 Enfant de minuit');
-  add((g['Comédie'] || 0) >= 5, '😂 Maître du rire');
-  add((g['Science-fiction'] || 0) >= 5, '🚀 Voyageur spatial');
-  add((g['Action'] || 0) >= 5, '⚔️ Cœur d\'action');
-  add((g['Romance'] || 0) >= 5, '💘 Cœur tendre');
-  add((g['Mystère'] || 0) >= 5, '🕵️ Détective du dimanche');
+  add((g['Thriller'] || 0) >= 5, 'Amateur de thrillers');
+  add((g['Horreur'] || 0) >= 5, 'Enfant de minuit');
+  add((g['Comédie'] || 0) >= 5, 'Maître du rire');
+  add((g['Science-fiction'] || 0) >= 5, 'Voyageur spatial');
+  add((g['Action'] || 0) >= 5, 'Cœur d\'action');
+  add((g['Romance'] || 0) >= 5, 'Cœur tendre');
+  add((g['Mystère'] || 0) >= 5, 'Détective du dimanche');
 
-  add(watchedMovies.filter(m => year(m) && year(m) < 2000).length >= 5, '🏛️ Roi des classiques');
-  add(watchedMovies.filter(m => year(m) >= 1980 && year(m) < 2000).length >= 5, '📼 Nostalgique VHS');
-  add(new Set(watchedMovies.map(year).filter(Boolean)).size >= 10, '🎞️ Cinéphile curieux');
-  add(Object.keys(g).length >= 8, '🧭 Explorateur cinéma');
+  add(watchedMovies.filter(m => year(m) && year(m) < 2000).length >= 5, 'Roi des classiques');
+  add(watchedMovies.filter(m => year(m) >= 1980 && year(m) < 2000).length >= 5, 'Nostalgique VHS');
+  add(new Set(watchedMovies.map(year).filter(Boolean)).size >= 10, 'Cinéphile curieux');
+  add(Object.keys(g).length >= 8, 'Explorateur cinéma');
 
-  add(seriesList.length >= 3, '📺 Sériephile');
-  add(seriesList.length >= 5, '📡 Accro aux épisodes');
-  add(episodes >= 50, '⏭️ Marathonien');
-  add(seriesList.filter(s => s.status === 'Terminé').length >= 3, '✅ Finisher');
+  add(seriesList.length >= 3, 'Sériephile');
+  add(seriesList.length >= 5, 'Accro aux épisodes');
+  add(episodes >= 50, 'Marathonien');
+  add(seriesList.filter(s => s.status === 'Terminé').length >= 3, 'Finisher');
 
-  add(watchlist.length >= 20, '📝 Collectionneur');
-  add(watchlist.length >= 10, '🎯 Toujours prêt');
-  add(customLists.length >= 3, '🗂️ Curateur');
-  add(ratings.length >= 10, '⭐ Goût affirmé');
+  add(watchlist.length >= 20, 'Collectionneur');
+  add(watchlist.length >= 10, 'Toujours prêt');
+  add(customLists.length >= 3, 'Curateur');
+  add(ratings.length >= 10, '★ Goût affirmé');
 
-  add(favoriteMovies.length + favoriteSeries.length >= 5, '🌟 Fan absolu');
-  add(favoritePeople.length >= 3, '🎭 Fidèle au casting');
-  add(!!(userProfile.name && userProfile.avatarData), '🪞 Signature perso');
-  add(activityTracker.watchedTonight >= 3, '🌙 Vu ce soir');
-  add(Object.keys(activityTracker.activityDates || {}).length >= 7, '📆 Régulier');
+  add(favoriteMovies.length + favoriteSeries.length >= 5, 'Fan absolu');
+  add(favoritePeople.length >= 3, 'Fidèle au casting');
+  add(!!(userProfile.name && userProfile.avatarData), 'Signature perso');
+  add(activityTracker.watchedTonight >= 3, 'Vu ce soir');
+  add(Object.keys(activityTracker.activityDates || {}).length >= 7, 'Régulier');
 
   const weekAgo = Date.now() - 7 * 24 * 3600 * 1000;
-  add(watchedMovies.filter(m => new Date(m.addedAt) >= weekAgo).length >= 5, '🔥 En feu');
-  add(typeof afiWatchedCount === 'function' && afiWatchedCount() >= 100, '🦍 Regelegorilla');
-  add(badges.length >= 5, '👑 Identité ciné');
+  add(watchedMovies.filter(m => new Date(m.addedAt) >= weekAgo).length >= 5, 'En feu');
+  add(typeof afiWatchedCount === 'function' && afiWatchedCount() >= 100, 'Regelegorilla');
+  add(badges.length >= 5, 'Identité ciné');
 
   return { badges, descriptions: BADGE_DESCRIPTIONS };
 }
@@ -1129,7 +1128,7 @@ function featuredCard(movie, heading, buttons) {
         <h2>${esc(titleOf(movie))}</h2>
         <div>
           <span class="badge">${yearOf(movie)}</span>
-          ${movie.vote_average ? `<span class="badge">⭐ ${Number(movie.vote_average).toFixed(1)}</span>` : ''}
+          ${movie.vote_average ? `<span class="badge">★ ${Number(movie.vote_average).toFixed(1)}</span>` : ''}
         </div>
         <p class="small" style="margin-top:10px;">${esc(movie.overview || 'Pas de synopsis disponible.')}</p>
         ${provSlot(movie, 'nohide')}
@@ -1189,7 +1188,7 @@ async function pickRandomMovie() {
     let label = '';
     if (mode === 'genre') {
       const genreId = Number($('genreSelect')?.value || 28);
-      label = `🎲 ${GENRE_MAP[genreId] || 'Hasard'}`;
+      label = `${GENRE_MAP[genreId] || 'Hasard'}`;
       const data = await tmdb(`/discover/movie?${discoverQuery(genreId)}`, 0);
       movie = rand((data.results || []).filter(m => m.poster_path));
     } else {
@@ -1202,7 +1201,7 @@ async function pickRandomMovie() {
         .filter(m => m.poster_path && (m.vote_count || 0) >= 20)
         .filter(m => !decade || (yr(m) >= decade && yr(m) <= decade + 9))
         .filter(m => !minRating || (m.vote_average || 0) >= minRating);
-      label = `🎲 ${selectedActor.name}`;
+      label = `${selectedActor.name}`;
       movie = rand(pool);
     }
 
@@ -1234,7 +1233,7 @@ async function pickMovieOfTheNight() {
     if (!movie) { box.innerHTML = '<div class="empty">Aucun film trouvé.</div>'; return; }
 
     const m = remember(movie, 'movie');
-    box.innerHTML = featuredCard(m, '🎬 Film du soir', `
+    box.innerHTML = featuredCard(m, 'Film du soir', `
       ${btn('watchlist', 'À voir', ref(m))}
       ${btn('watched', 'Vu', ref(m))}
       ${btn('details', 'Détails', ref(m))}
@@ -1247,7 +1246,7 @@ async function pickMovieOfTheNight() {
 function watchedTonight(item) {
   activityTracker.watchedTonight += 1;
   addWatched(item); // sauvegarde + toast
-  toast('Film marqué comme vu ce soir ! 🌙');
+  toast('Film marqué comme vu ce soir !');
 }
 
 function pickRandomFromWatchlist() {
@@ -1256,7 +1255,7 @@ function pickRandomFromWatchlist() {
   if (!watchlist.length) { box.innerHTML = '<div class="empty">Ta watchlist est vide.</div>'; return; }
 
   const m = remember(rand(watchlist));
-  box.innerHTML = featuredCard(m, '🎲 Film tiré au hasard de ta watchlist', `
+  box.innerHTML = featuredCard(m, 'Film tiré au hasard de ta watchlist', `
     ${btn('watched', 'Je l’ai vu', ref(m))}
     ${btn('details', 'Détails', ref(m))}
     ${btn('share', 'Partager', ref(m))}
@@ -1280,7 +1279,7 @@ function addToCustomList(listId, id, type) {
   if (list.movies.some(m => m.id === id)) { toast('Déjà dans cette liste'); return; }
   list.movies.push({ ...safeItem({ ...item, media_type: type }), title: titleOf(item) });
   saveAll();
-  toast(`🗂️ Ajouté à « ${list.name} »`);
+  toast(`Ajouté à « ${list.name} »`);
 }
 
 function removeFromCustomList(listId, movieId) {
@@ -1297,15 +1296,15 @@ function deleteCustomList(listId) {
 function renderCustomLists() {
   const box = $('customLists');
   if (!box) return;
-  if (!customLists.length) { box.innerHTML = '<div class="empty">Pas encore de liste 🗂️<br>Essaie « Soirées entre potes », « À voir en hiver » ou « Mes coups de cœur ».</div>'; return; }
+  if (!customLists.length) { box.innerHTML = '<div class="empty">Pas encore de liste<br>Essaie « Soirées entre potes », « À voir en hiver » ou « Mes coups de cœur ».</div>'; return; }
 
   box.innerHTML = customLists.map(list => `
     <div class="card" style="margin-bottom:12px;">
       <h3>${esc(list.name)} <span class="small">· ${list.movies.length} film${list.movies.length > 1 ? 's' : ''}</span></h3>
       ${list.movies.length ? `<div class="strip">${list.movies.slice(0, 10).map(m => `<img loading="lazy" src="${poster(m.poster_path)}" alt="${esc(m.title)}" title="${esc(m.title)}" data-act="details" data-id="${m.id}" data-type="${typeOf(m)}">`).join('')}</div>` : ''}
       <div class="buttons" style="margin-bottom:8px;">
-        ${btn('listRandom', '🎲 Au hasard', { list: list.id })}
-        ${btn('listShare', '🔗 Partager', { list: list.id })}
+        ${btn('listRandom', 'Au hasard', { list: list.id })}
+        ${btn('listShare', 'Partager', { list: list.id })}
         ${btn('listDelete', 'Supprimer liste', { list: list.id })}
       </div>
       <div>${list.movies.map(movie => `
@@ -1325,7 +1324,7 @@ function pickRandomFromList(listId) {
   if (!list || !list.movies.length || !box) return;
 
   const m = remember(rand(list.movies));
-  box.innerHTML = featuredCard(m, `🎲 Film tiré au hasard de ${esc(list.name)}`, `
+  box.innerHTML = featuredCard(m, `Film tiré au hasard de ${esc(list.name)}`, `
     ${btn('watched', 'Je l’ai vu', ref(m))}
     ${btn('details', 'Détails', ref(m))}
     ${btn('share', 'Partager', ref(m))}
@@ -1365,7 +1364,7 @@ async function openDetails(id, mediaType) {
             <span class="badge">${type === 'tv' ? 'Série' : 'Film'}</span>
             ${date ? `<span class="badge">${date.slice(0, 4)}</span>` : ''}
             ${runtime ? `<span class="badge">${runtime}</span>` : ''}
-            ${d.vote_average ? `<span class="badge">⭐ ${Number(d.vote_average).toFixed(1)}</span>` : ''}
+            ${d.vote_average ? `<span class="badge">★ ${Number(d.vote_average).toFixed(1)}</span>` : ''}
             ${genres ? `<span class="badge">${esc(genres)}</span>` : ''}
           </div>
           <p style="margin-top:14px; line-height:1.5;">${esc(d.overview || 'Aucun synopsis disponible.')}</p>
@@ -1432,6 +1431,7 @@ function importData(input) {
 /* ---------- Cloche des badges ---------- */
 let soundEnabled = getStorage('cine_sound', true);
 let knownBadges = getStorage('cine_badgesSeen', null);
+if (Array.isArray(knownBadges)) knownBadges = knownBadges.map(n => String(n).replace(/^[^A-Za-zÀ-ÿ0-9]+/, ''));
 let audioCtx = null;
 
 function unlockAudio() {
@@ -1483,7 +1483,7 @@ function checkNewBadges() {
   knownBadges = [...new Set([...knownBadges, ...badges])];
   setStorage('cine_badgesSeen', knownBadges);
   playBell();
-  setTimeout(() => toast(`🏆 Badge débloqué : ${fresh.join(' · ')}`), 1500);
+  setTimeout(() => toast(`Badge débloqué : ${fresh.join(' · ')}`), 1500);
 }
 
 /* ---------- Rendu global ---------- */
@@ -1565,8 +1565,8 @@ function versionBanner() {
   const d = document.createElement('div');
   d.style.cssText = 'background:#b45309;color:#fff;padding:10px 14px;font-size:14px;text-align:center';
   d.textContent = window.CLAP_PLUS_VERSION
-    ? '⚠️ Fichiers de versions différentes : remplace TOUS les fichiers du site (index.html, clap.js, clap-plus.js, sw.js…) puis recharge avec Ctrl+F5.'
-    : '⚠️ Le fichier clap-plus.js est introuvable ou cassé : envoie-le au même endroit que index.html puis recharge avec Ctrl+F5.';
+    ? 'Fichiers de versions différentes : remplace TOUS les fichiers du site (index.html, clap.js, clap-plus.js, sw.js…) puis recharge avec Ctrl+F5.'
+    : 'Le fichier clap-plus.js est introuvable ou cassé : envoie-le au même endroit que index.html puis recharge avec Ctrl+F5.';
   document.body.prepend(d);
 }
 

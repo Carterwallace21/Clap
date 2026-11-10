@@ -1,4 +1,4 @@
-window.CLAP_PLUS_VERSION = 27;
+window.CLAP_PLUS_VERSION = 28;
 /* ============================================================
    Clap+ : plateformes, rappels, partage, vote, recommandations,
    import CSV et bilan annuel.
@@ -106,7 +106,7 @@ function renderProv(r, mine) {
   const hit = r.flat.some(p => mine.has(p.provider_id));
   return r.flat.slice(0, 6).map(p =>
     `<img class="plogo ${mine.has(p.provider_id) ? 'mine' : ''}" src="${IMG_LOGO}${esc(p.logo_path)}" alt="${esc(p.provider_name)}" title="${esc(p.provider_name)}" loading="lazy">`
-  ).join('') + (hit ? '<span class="pmine">✅ Sur tes plateformes</span>' : '');
+  ).join('') + (hit ? '<span class="pmine">Sur tes plateformes</span>' : '');
 }
 
 function paintProv(el, r) {
@@ -159,7 +159,7 @@ async function computeReminders() {
   const out = [];
   watchlist.filter(m => typeOf(m) === 'movie' && m.release_date).forEach(m => {
     const n = dayDiff(m.release_date);
-    if (n >= 0 && n <= 7) out.push({ key: `m${m.id}:${m.release_date}`, icon: '🎬', text: `${titleOf(m)} sort ${whenLabel(n)} au cinéma`, n, id: m.id, type: 'movie' });
+    if (n >= 0 && n <= 7) out.push({ key: `m${m.id}:${m.release_date}`, icon: '', text: `${titleOf(m)} sort ${whenLabel(n)} au cinéma`, n, id: m.id, type: 'movie' });
   });
   const tracked = seriesList.filter(s => s.status !== 'Terminé');
   const infos = await Promise.all(tracked.map(async s => {
@@ -169,7 +169,7 @@ async function computeReminders() {
     const ne = d.next_episode_to_air;
     if (!ne?.air_date) return;
     const n = dayDiff(ne.air_date);
-    if (n >= 0 && n <= 7) out.push({ key: `e${s.id}:${ne.season_number}x${ne.episode_number}`, icon: '📺', text: `${s.name} · S${ne.season_number}E${ne.episode_number} ${whenLabel(n)}`, n, id: s.id, type: 'tv' });
+    if (n >= 0 && n <= 7) out.push({ key: `e${s.id}:${ne.season_number}x${ne.episode_number}`, icon: '', text: `${s.name} · S${ne.season_number}E${ne.episode_number} ${whenLabel(n)}`, n, id: s.id, type: 'tv' });
   });
   return out.sort((a, b) => a.n - b.n);
 }
@@ -182,7 +182,7 @@ async function notifyReminders(list) {
     try {
       const reg = await navigator.serviceWorker?.getRegistration();
       const opts = { body: r.text, icon: 'icon-192.png', badge: 'icon-192.png', tag: r.key };
-      if (reg) await reg.showNotification('Clap 🎬', opts); else new Notification('Clap 🎬', opts);
+      if (reg) await reg.showNotification('Clap', opts); else new Notification('Clap', opts);
       seen[r.key] = Date.now();
     } catch { /* notification impossible ici */ }
   }
@@ -197,7 +197,7 @@ async function refreshReminders() {
   try { list = await computeReminders(); } catch { /* ignore */ }
   box.innerHTML = list.length ? `
     <div class="card section">
-      <h3>🔔 Rappels</h3>
+      <h3>Rappels</h3>
       ${list.map(r => `<div class="reminder"><span>${r.icon} ${esc(r.text)}</span>${btn('details', 'Détails', { id: r.id, type: r.type })}</div>`).join('')}
     </div>` : '';
   notifyReminders(list);
@@ -249,7 +249,7 @@ async function shareOrCopy(title, text, url) {
     try { await navigator.share({ title, text, url }); return; }
     catch (e) { if (e?.name === 'AbortError') return; }
   }
-  try { await navigator.clipboard.writeText(url); toast('🔗 Lien copié'); }
+  try { await navigator.clipboard.writeText(url); toast('Lien copié'); }
   catch { prompt('Copie ce lien :', url); }
 }
 
@@ -309,7 +309,7 @@ function showSharedList(data) {
   if (!items.length) { toast('Liste vide ou invalide'); return; }
   sharedCurrent = { name: String(data.n || 'Liste partagée').slice(0, 80), items };
   openAppModal(`
-    <h3>📨 ${esc(sharedCurrent.name)}</h3>
+    <h3>${esc(sharedCurrent.name)}</h3>
     <p class="small">${data.u ? 'Partagée par ' + esc(String(data.u).slice(0, 40)) + ' · ' : ''}${items.length} titres</p>
     <div class="buttons">
       ${btn('sharedAddWL', 'Tout ajouter à mon À voir')}
@@ -329,14 +329,14 @@ function sharedAddWL() {
     n++;
   });
   saveAll();
-  toast(n ? `📝 ${n} titres ajoutés à ton À voir` : 'Tout est déjà dans ta liste');
+  toast(n ? `${n} titres ajoutés à ton À voir` : 'Tout est déjà dans ta liste');
 }
 
 function sharedSave() {
   if (!sharedCurrent) return;
   customLists.push({ id: Date.now(), name: sharedCurrent.name, movies: sharedCurrent.items.map(m => ({ ...safeItem(m), title: titleOf(m) })) });
   saveAll();
-  toast(`🗂️ Liste « ${sharedCurrent.name} » enregistrée`);
+  toast(`Liste « ${sharedCurrent.name} » enregistrée`);
 }
 
 function showTaste(data) {
@@ -360,7 +360,7 @@ function showTaste(data) {
   const loved = sharedItems(data.l).filter(m => !mine.has(m.id) && !watchlist.some(w => w.id === m.id)).slice(0, 8);
 
   openAppModal(`
-    <h3>🤝 Toi & ${esc(name)}</h3>
+    <h3>Toi & ${esc(name)}</h3>
     <div class="card stat" style="margin:12px 0">
       <b style="font-size:40px">${score === null ? '—' : score + '%'}</b>
       <span class="small">${score === null ? 'Marque quelques films comme vus pour calculer votre compatibilité' : 'de compatibilité ciné'}</span>
@@ -407,12 +407,12 @@ function renderVote() {
   const who = esc(v.players[v.i] || '');
   if (v.phase === 'handoff') {
     openAppModal(`
-      <h3>📱 Passe le téléphone à <b>${who}</b></h3>
-      <p class="small">Joueur ${v.i + 1} sur ${v.players.length}. Les autres ne regardent pas 😉</p>
+      <h3>Passe le téléphone à <b>${who}</b></h3>
+      <p class="small">Joueur ${v.i + 1} sur ${v.players.length}. Les autres ne regardent pas</p>
       <div class="buttons">${btn('voteReady', 'Je suis prêt·e')}</div>`);
   } else if (v.phase === 'pick') {
     openAppModal(`
-      <h3>👍 ${who}, qu’est-ce qui te tente ?</h3>
+      <h3>${who}, qu’est-ce qui te tente ?</h3>
       <p class="small">Touche les films que tu veux bien regarder, puis valide.</p>
       <div class="vote-grid">
         ${v.cands.map(m => `<div class="vote-item ${v.picks.has(m.id) ? 'on' : ''}" data-act="votePick" data-id="${m.id}"><img loading="lazy" src="${poster(m.poster_path)}" alt=""><div>${esc(titleOf(m))}</div></div>`).join('')}
@@ -423,7 +423,7 @@ function renderVote() {
     const tie = sorted.filter(c => v.score[c.id] === v.score[sorted[0].id]).length > 1;
     const win = v.winner;
     openAppModal(`
-      <h3>🏆 ${tie ? 'Égalité : le hasard a tranché' : 'Le groupe a choisi'}</h3>
+      <h3>${tie ? 'Égalité : le hasard a tranché' : 'Le groupe a choisi'}</h3>
       <div class="card result-card" style="margin:12px 0">
         <img class="poster" src="${poster(win.poster_path)}" alt="${esc(titleOf(win))}">
         <div>
@@ -596,8 +596,8 @@ async function importCSV(input) {
   input.value = '';
   watchlist = watchlist.filter(w => !watchedMovies.some(m => m.id === w.id));
   saveAll();
-  if (status) status.textContent = `✅ ${totalOk} films importés${totalMiss ? ` · ${totalMiss} introuvables` : ''}.`;
-  toast(`📥 ${totalOk} films importés`);
+  if (status) status.textContent = `${totalOk} films importés${totalMiss ? ` · ${totalMiss} introuvables` : ''}.`;
+  toast(`${totalOk} films importés`);
 }
 
 
@@ -614,7 +614,7 @@ function undoLast() {
   watchedMovies = u.watched; watchlist = u.watchlist;
   try { localStorage.removeItem('cine_undo'); } catch { /* ignoré */ }
   saveAll();
-  toast('↩️ Annulé');
+  toast('Annulé');
 }
 function clearData(kind) {
   const isW = kind === 'watched';
@@ -624,14 +624,14 @@ function clearData(kind) {
   saveUndo(isW ? 'Suppression des films vus' : 'Suppression de la watchlist');
   if (isW) watchedMovies = []; else watchlist = [];
   saveAll();
-  toast('🗑️ Supprimé — tu peux annuler dans Profil');
+  toast('Supprimé — tu peux annuler dans Profil');
 }
 function renderCleanup() {
   const box = $('undoBox');
   if (!box) return;
   let u = null;
   try { u = JSON.parse(localStorage.getItem('cine_undo') || 'null'); } catch { /* ignoré */ }
-  box.innerHTML = u ? `<button type="button" class="primary" data-act="undoLast">↩️ Annuler : ${esc(u.label)}</button><p class="small" style="margin:6px 0 0">Sauvegardé le ${formatDate(u.at)}</p>` : '<p class="small" style="margin:0">Rien à annuler pour l’instant.</p>';
+  box.innerHTML = u ? `<button type="button" class="primary" data-act="undoLast">Annuler : ${esc(u.label)}</button><p class="small" style="margin:6px 0 0">Sauvegardé le ${formatDate(u.at)}</p>` : '<p class="small" style="margin:0">Rien à annuler pour l’instant.</p>';
 }
 
 /* ============================================================
@@ -663,7 +663,7 @@ function renderJournal(box) {
           ${m.rating ? `<div class="j-stars">${starsText(m.rating)}</div>` : ''}
           ${m.review ? `<p class="j-review">${esc(m.review)}</p>` : ''}
           <div class="buttons" style="margin-top:6px">
-            ${btn('review', m.review ? '✍️ Modifier' : '✍️ Critique', { id: m.id })}
+            ${btn('review', m.review ? 'Modifier' : 'Critique', { id: m.id })}
             ${btn('details', 'Détails', ref(m))}
             ${btn('rmWatched', 'Retirer', { id: m.id })}
           </div>
@@ -679,7 +679,7 @@ function openReview(id) {
   if (!m) return;
   reviewDraft = { id, n: m.rating || 0 };
   openAppModal(`
-    <h3>✍️ ${esc(m.title || m.name)} <span class="small">${yearOf(m) === '----' ? '' : yearOf(m)}</span></h3>
+    <h3>${esc(m.title || m.name)} <span class="small">${yearOf(m) === '----' ? '' : yearOf(m)}</span></h3>
     <label>Vu le</label>
     <input id="rvDate" type="date" value="${esc(watchedDate(m))}" max="${new Date().toISOString().slice(0, 10)}">
     <label>Ta note</label>
@@ -702,7 +702,7 @@ function saveReview() {
   watchedMovies = watchedMovies.map(m => m.id === id ? { ...m, rating: n || null, review: text, watchedOn: /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : m.watchedOn } : m);
   saveAll();
   closeAppModal();
-  toast('📖 Journal mis à jour');
+  toast('Journal mis à jour');
 }
 
 /* ---------- Accueil plus chaleureux ---------- */
@@ -717,7 +717,7 @@ function renderHello() {
   let line = 'Qu’est-ce qu’on regarde ce soir ?';
   if (nMonth > 1) line = `${nMonth} films vus ce mois-ci. Qu’est-ce qu’on regarde ensuite ?`;
   else if (watchlist.length) line = `Tu as ${watchlist.length} film${watchlist.length > 1 ? 's' : ''} qui t’attend${watchlist.length > 1 ? 'ent' : ''} dans ta liste.`;
-  box.innerHTML = `<h2 style="margin:0 0 2px">${hi}${name ? ' ' + esc(name) : ''} 👋</h2><p class="small" style="margin:0 0 14px">${esc(line)}</p>`;
+  box.innerHTML = `<h2 style="margin:0 0 2px">${hi}${name ? ' ' + esc(name) : ''}</h2><p class="small" style="margin:0 0 14px">${esc(line)}</p>`;
 }
 
 Object.assign(ACTIONS, {
@@ -760,7 +760,7 @@ function exportLetterboxd(kind) {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  toast(`📤 ${count} films exportés`);
+  toast(`${count} films exportés`);
 }
 
 function exportPosters(kind) {
@@ -770,16 +770,16 @@ function exportPosters(kind) {
   const cards = list.map(m => {
     const img = m.poster_path ? `${IMG}${m.poster_path}` : '';
     const y = yearOf(m);
-    return `<figure>${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : '<div class="np">🎬</div>'}<figcaption>${esc(m.title || m.name)}<small>${y === '----' ? '' : y}${m.rating ? ' · ' + '★'.repeat(m.rating) : ''}</small></figcaption></figure>`;
+    return `<figure>${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : '<div class="np"></div>'}<figcaption>${esc(m.title || m.name)}<small>${y === '----' ? '' : y}${m.rating ? ' · ' + '★'.repeat(m.rating) : ''}</small></figcaption></figure>`;
   }).join('');
   const title = kind === 'watchlist' ? 'Ma watchlist' : 'Mes films vus';
-  const html = `<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} - Clap</title><style>body{margin:0;padding:16px;background:#0b1020;color:#fff;font-family:system-ui,sans-serif}h1{font-size:20px}main{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}figure{margin:0}img,.np{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:8px;background:#1b2340;display:flex;align-items:center;justify-content:center;font-size:32px}figcaption{font-size:12px;margin-top:4px}small{display:block;color:#9aa6d0}</style><h1>🎬 ${title} (${list.length})</h1><main>${cards}</main></html>`;
+  const html = `<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} - Clap</title><style>body{margin:0;padding:16px;background:#0b1020;color:#fff;font-family:system-ui,sans-serif}h1{font-size:20px}main{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}figure{margin:0}img,.np{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:8px;background:#1b2340;display:flex;align-items:center;justify-content:center;font-size:32px}figcaption{font-size:12px;margin-top:4px}small{display:block;color:#9aa6d0}</style><h1>${title} (${list.length})</h1><main>${cards}</main></html>`;
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
   a.download = kind === 'watchlist' ? 'clap-watchlist-affiches.html' : 'clap-vus-affiches.html';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  toast(`🖼️ ${list.length} affiches exportées`);
+  toast(`${list.length} affiches exportées`);
 }
 
 /* ============================================================
@@ -875,7 +875,7 @@ async function generateRecap() {
     font('600', 28); ctx.fillStyle = '#e8ecf8'; ctx.fillText(fitText(ctx, name, 260), 60, y + 30);
     const w = Math.max(24, Math.round(520 * c / maxC));
     const grad = ctx.createLinearGradient(340, 0, 340 + w, 0);
-    grad.addColorStop(0, '#6366f1'); grad.addColorStop(1, '#3b82f6');
+    grad.addColorStop(0, '#dc2626'); grad.addColorStop(1, '#7f1d1d');
     ctx.fillStyle = grad; roundRect(ctx, 340, y, w, 40, 12); ctx.fill();
     font('700', 26); ctx.fillStyle = '#ffffff'; ctx.fillText(String(c), 340 + w + 14, y + 30);
   });
@@ -916,7 +916,7 @@ function shareRecap() {
     if (!blob) { downloadRecap(); return; }
     const file = new File([blob], 'clap-bilan.png', { type: 'image/png' });
     if (navigator.canShare?.({ files: [file] })) {
-      try { await navigator.share({ files: [file], title: 'Mon année ciné', text: 'Mon bilan ciné sur Clap 🎬' }); return; }
+      try { await navigator.share({ files: [file], title: 'Mon année ciné', text: 'Mon bilan ciné sur Clap' }); return; }
       catch (e) { if (e?.name === 'AbortError') return; }
     }
     downloadRecap();
@@ -969,7 +969,7 @@ function goalCounts() {
 }
 
 function paceMsg(done, goal, unit) {
-  if (done >= goal) return '🎉 Objectif atteint !';
+  if (done >= goal) return 'Objectif atteint !';
   const { day, total } = yearProgress();
   const diff = Math.round(done - goal * day / total);
   const state = diff > 0 ? `en avance de ${diff}` : diff < 0 ? `en retard de ${-diff}` : 'pile dans le rythme';
@@ -981,7 +981,7 @@ function paceMsg(done, goal, unit) {
 
 function goalRows(detail) {
   const g = getGoals(), c = goalCounts();
-  return [['films', '🎬 Films', 'films'], ['series', '📺 Séries', 'épisodes'], ['anime', '🎌 Animes', 'épisodes']]
+  return [['films', 'Films', 'films'], ['series', 'Séries', 'épisodes'], ['anime', 'Animes', 'épisodes']]
     .filter(([k]) => g[k] > 0)
     .map(([k, label, unit]) => {
       const pct = Math.min(100, Math.round(c[k] / g[k] * 100));
@@ -1001,7 +1001,7 @@ function renderGoals() {
   const mini = $('goalsMini');
   if (mini) {
     const rows = goalRows(false);
-    mini.innerHTML = rows ? `<div class="card section goal-mini" data-act="goalsOpen"><h3>🎯 Mes objectifs ${year}</h3>${rows}</div>` : '';
+    mini.innerHTML = rows ? `<div class="card section goal-mini" data-act="goalsOpen"><h3>Mes objectifs ${year}</h3>${rows}</div>` : '';
   }
 }
 
@@ -1052,18 +1052,18 @@ function renderResume() {
   if (!rows.length) { box.innerHTML = ''; return; }
   box.innerHTML = `
     <div class="section">
-      <h2>▶️ Reprendre</h2>
+      <h2>Reprendre</h2>
       <div class="home-grid">
         ${rows.slice(0, 6).map(({ s, nx, seen, total }) => {
           const d = { sid: s.id, season: nx.se.seasonNumber, ep: nx.ep.episodeNumber };
           return `<div class="home-mini-card">
             <img class="home-mini-poster" loading="lazy" src="${poster(s.poster_path)}" alt="${esc(s.name)}">
             <div>
-              <div><strong>${esc(s.name)}${s.isAnime ? ' 🎌' : ''}</strong></div>
+              <div><strong>${esc(s.name)}${s.isAnime ? '' : ''}</strong></div>
               <div class="small">S${nx.se.seasonNumber}E${nx.ep.episodeNumber} · ${esc(nx.ep.name)}</div>
               <div class="small">${seen}/${total} vus</div>
               <div class="buttons" style="margin-top:8px">
-                ${btn('resumeSeen', '✅ Vu', d)}
+                ${btn('resumeSeen', 'Vu', d)}
                 ${btn('resumeOpen', 'Ouvrir', { sid: s.id })}
               </div>
             </div>
@@ -1228,9 +1228,9 @@ function upRow(e) {
   const followed = type === 'tv' && seriesList.some(s => s.id === id);
   const inList = e.kind === 'movie' && (watchlist.some(m => m.id === id) || watchedMovies.some(m => m.id === id));
   let badges = '';
-  if (e.anime) badges += '<span class="badge">🎌 Anime</span>';
-  if (e.kind === 'episode' || followed) badges += '<span class="badge">📺 Tu suis</span>';
-  else if (e.inList || inList) badges += '<span class="badge">📝 Dans ta liste</span>';
+  if (e.anime) badges += '<span class="badge">Anime</span>';
+  if (e.kind === 'episode' || followed) badges += '<span class="badge">Tu suis</span>';
+  else if (e.inList || inList) badges += '<span class="badge">Dans ta liste</span>';
   let buttons = btn('details', 'Détails', { id, type });
   if (e.kind === 'movie' && !inList) buttons += btn('watchlist', '＋ À voir', { id, type });
   if (e.kind === 'tv' && !followed) buttons += btn('follow', 'Suivre', { id, type });
@@ -1276,7 +1276,7 @@ function setUpcoming() {
    Filmographie d'un acteur (depuis la recherche)
    ============================================================ */
 async function showPersonFilms(id, name) {
-  openAppModal(`<h3>🎬 ${esc(name)}</h3><div class="small">Chargement…</div>`);
+  openAppModal(`<h3>${esc(name)}</h3><div class="small">Chargement…</div>`);
   try {
     const d = await tmdb(`/person/${id}/combined_credits`, 3600000);
     const seen = new Set();
@@ -1287,9 +1287,9 @@ async function showPersonFilms(id, name) {
       .filter(m => { const k = m.media_type + m.id; if (seen.has(k)) return false; seen.add(k); return true; })
       .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
       .slice(0, 48);
-    if (!items.length) { openAppModal(`<h3>🎬 ${esc(name)}</h3><div class="empty">Aucun titre trouvé.</div>`); return; }
+    if (!items.length) { openAppModal(`<h3>${esc(name)}</h3><div class="empty">Aucun titre trouvé.</div>`); return; }
     openAppModal(`
-      <h3>🎬 ${esc(name)}</h3>
+      <h3>${esc(name)}</h3>
       <p class="small">${items.length} titres, du plus populaire au moins populaire</p>
       <div class="vote-grid">
         ${items.map(raw => {
@@ -1303,7 +1303,7 @@ async function showPersonFilms(id, name) {
         }).join('')}
       </div>`);
   } catch {
-    openAppModal(`<h3>🎬 ${esc(name)}</h3><div class="empty">Impossible de charger sa filmographie.</div>`);
+    openAppModal(`<h3>${esc(name)}</h3><div class="empty">Impossible de charger sa filmographie.</div>`);
   }
 }
 
@@ -1382,7 +1382,7 @@ async function loadAFI() {
     const items = [];
     found.forEach((it, i) => {
       if (!it) return;
-      reasons.set(it.id, `🏛️ AFI n°${rows[i][0]}${watchedMovies.some(m => m.id === it.id) ? ' · ✅ vu' : ''}`);
+      reasons.set(it.id, `AFI n°${rows[i][0]}${watchedMovies.some(m => m.id === it.id) ? ' · vu' : ''}`);
       items.push(it);
     });
     renderHomeList('afiList', items, 'movie', reasons);
@@ -1432,31 +1432,7 @@ function initAFI() {
   loadAFI();
 }
 
-const ACCENTS = ['#00e054', '#ff8000', '#40bcf4', '#ff5fa2', '#a78bfa', '#ef4444', '#facc15'];
-function applyAccent(c, save) {
-  if (!/^#[0-9a-f]{6}$/i.test(c)) return;
-  const n = parseInt(c.slice(1), 16);
-  const lum = 0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
-  document.documentElement.style.setProperty('--accent', c);
-  document.documentElement.style.setProperty('--on', lum > 150 ? '#0d1a12' : '#ffffff');
-  if (save) { try { localStorage.setItem('cine_accent', c); } catch { /* ignoré */ } }
-  document.querySelectorAll('.sw').forEach(b => b.classList.toggle('on', b.dataset.c.toLowerCase() === c.toLowerCase()));
-  const pick = $('accentPick'); if (pick) pick.value = c;
-}
-function renderSwatches() {
-  const box = $('swatches');
-  if (!box) return;
-  const cur = (getComputedStyle(document.documentElement).getPropertyValue('--accent') || ACCENTS[0]).trim();
-  box.innerHTML = ACCENTS.map(c => `<button type="button" class="sw" data-c="${c}" style="background:${c}" aria-label="${c}"></button>`).join('')
-    + `<input type="color" id="accentPick" value="${/^#[0-9a-f]{6}$/i.test(cur) ? cur : ACCENTS[0]}" title="Couleur personnalisée"><button type="button" id="accentReset">Réinitialiser</button>`;
-  box.querySelectorAll('.sw').forEach(b => b.addEventListener('click', () => applyAccent(b.dataset.c, true)));
-  $('accentPick').addEventListener('input', e => applyAccent(e.target.value, true));
-  $('accentReset').addEventListener('click', () => { try { localStorage.removeItem('cine_accent'); } catch { /* ignoré */ } document.documentElement.style.removeProperty('--accent'); document.documentElement.style.removeProperty('--on'); renderSwatches(); });
-  box.querySelectorAll('.sw').forEach(b => b.classList.toggle('on', b.dataset.c.toLowerCase() === cur.toLowerCase()));
-}
-
 function initPlus() {
-  renderSwatches();
   initAFI();
   applyOnlyMine();
   fillGoalInputs();
