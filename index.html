@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Clap">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="color-scheme" content="dark">
+<title>Clap</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+<style>
+  :root{
+    --bg:#000000; --panel:#0d0d0d; --panel2:#181818; --line:#2a2a2a;
+    --text:#e9eef2; --muted:#9ab; --accent:#00e054; --accent2:#ef4444; --on:#0d1a12;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{position:sticky;top:0;z-index:50;background:rgba(0,0,0,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{max-width:1000px;margin:auto;padding:12px 16px 0}
+  .logo{font-size:22px;font-weight:800;letter-spacing:.3px}
+  .logo span{color:var(--accent)}
+  .tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab-btn{flex:0 0 auto;background:transparent;color:var(--muted);border:1px solid transparent;border-radius:999px;padding:8px 14px;font-weight:600;cursor:pointer}
+  .tab-btn.active{background:var(--accent);color:var(--on)}
+  main{max-width:1000px;margin:auto;padding:16px}
+  h2{margin:0 0 12px;font-size:20px} h3{margin:0 0 6px;font-size:17px} h4{margin:0 0 4px}
+  .section{margin-bottom:28px}
+  .tab-content{display:none} .tab-content.active{display:block}
+  .series-panel{display:none} .series-panel.active{display:block}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .small{color:var(--muted);font-size:13px}
+  .empty{color:var(--muted);padding:14px;text-align:center;border:1px dashed var(--line);border-radius:12px}
+  .badge{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;margin:2px 4px 2px 0;font-size:12px}
+  .buttons,.rating-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  button,select,input[type=text],input:not([type]){font:inherit}
+  button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:7px 11px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent);border-color:var(--accent);color:var(--on);font-weight:700}
+  select,input[type=text],input:not([type]){background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
+  input[type=file]{color:var(--muted);max-width:100%}
+  label{display:block;color:var(--muted);font-size:13px;margin:10px 0 4px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+  .stat{text-align:center}.stat b{display:block;font-size:26px}
+
+  /* recherche */
+  .search-wrap{position:relative}
+  #searchSuggestions{display:none;position:absolute;left:0;right:0;top:100%;margin-top:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  .search-suggestion-item{padding:10px 14px;cursor:pointer}
+  .search-suggestion-item:hover{background:var(--panel2)}
+  .suggestion-meta{color:var(--muted);font-size:12px}
+  #searchResults{display:grid;gap:12px;margin-top:14px}
+
+  /* cartes */
+  .result-card{display:grid;grid-template-columns:120px 1fr !important;gap:14px}
+  .result-card .poster{width:100%;height:auto !important;aspect-ratio:2/3;object-fit:cover;border-radius:12px;background:#1f2937}
+  .list-card{display:grid;grid-template-columns:84px 1fr;gap:12px;align-items:start}
+  .list-poster{width:84px;aspect-ratio:2/3;object-fit:cover;border-radius:8px;background:#1f2937}
+  textarea{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:inherit;resize:vertical}
+  input[type=date]{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:inherit;width:100%;color-scheme:dark}
+  .j-month{display:flex;justify-content:space-between;align-items:baseline;color:var(--text);font-size:20px;font-weight:800;border-bottom:2px solid var(--accent);padding:6px 2px 8px;margin:34px 0 8px}.j-month span:last-child{font-size:13px;font-weight:400;color:var(--muted)}.j-month:first-child{margin-top:8px}
+  .j-row{display:grid;grid-template-columns:34px 56px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);align-items:start}
+  .j-day{font-size:22px;font-weight:700;text-align:center;line-height:1}.j-day small{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:3px}
+  .j-poster{width:56px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;background:#1f2937;cursor:pointer}
+  .j-title{font-weight:700}
+  .j-stars{color:var(--accent);letter-spacing:2px;font-size:15px}
+  .j-review{margin:6px 0 0;color:#cfd8df;font-size:14px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap}
+  .swatches{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px}
+  .sw{width:34px;height:34px;border-radius:50%;padding:0;border:2px solid transparent}.sw.on{border-color:#fff}
+  input[type=color]{width:44px;height:34px;padding:0;border:none;background:none;border-radius:8px}
+  .strip{display:flex;gap:6px;overflow-x:auto;margin:6px 0 10px;scrollbar-width:none}.strip img{height:84px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;cursor:pointer;flex:0 0 auto}
+  .vtoggle button.on{background:var(--accent);border-color:var(--accent);color:var(--on);font-weight:700}
+  .home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+  .home-mini-card{display:grid;grid-template-columns:72px 1fr;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px}
+  .home-mini-poster{width:72px;aspect-ratio:2/3;object-fit:cover;border-radius:8px;background:#1f2937}
+
+  /* séries */
+  .progress{height:8px;background:var(--panel2);border-radius:99px;overflow:hidden;margin-top:12px}
+  .progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  .season-card{background:var(--panel2);border-radius:14px;padding:12px;margin-top:12px}
+  .episode-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px}
+  .episode-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .subtabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+
+  /* modales */
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);overflow:auto;z-index:100;padding:16px}
+  .modal-box{position:relative;max-width:760px;margin:20px auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px}
+  .close{position:sticky;float:right;top:0}
+  .chart-box{position:relative;height:260px}
+  #displayAvatar{width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)}
+  @media (min-width:700px){.result-card{grid-template-columns:180px 1fr !important}}
+
+  /* ===== Mode appli mobile ===== */
+  html{-webkit-text-size-adjust:100%}
+  body{-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+  header{padding-top:env(safe-area-inset-top)}
+  .bar{padding-bottom:10px}
+  main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+  input,select{font-size:16px}
+  button{touch-action:manipulation}
+  #mainTabs{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;gap:2px;background:rgba(20,26,46,.97);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+  #mainTabs .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:10px;font-weight:600;border:0;border-radius:12px;background:transparent;color:var(--muted)}
+  #mainTabs .tab-btn i{font-style:normal;font-size:20px;line-height:1}
+  #mainTabs .tab-btn.active{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
+
+  /* ===== Clap+ ===== */
+  .prov{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;min-height:26px}
+  .plogo{width:26px;height:26px;border-radius:7px;object-fit:cover;opacity:.55}
+  .plogo.mine{opacity:1;outline:2px solid #22c55e}
+  .prov.big .plogo{width:38px;height:38px}
+  .pmine{font-size:12px;color:#86efac}
+  body.only-mine [data-avail="0"]{display:none !important}
+  .toggleRow{display:flex;gap:10px;align-items:center;color:var(--text);font-size:14px;margin:8px 0}
+  .toggleRow input{width:auto}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px 5px 5px;border-radius:999px;font-size:13px}
+  .chip img{width:24px;height:24px;border-radius:6px}
+  .chip.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
+  #providerPicker{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .reminder{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)}
+  .vote-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+  .vote-item{border:2px solid transparent;border-radius:12px;padding:6px;background:var(--panel2);text-align:center;font-size:12px}
+  .vote-item[data-act]{cursor:pointer}
+  .vote-item.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 20%,transparent)}
+  .vote-item img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:8px;background:#1f2937;margin-bottom:4px}
+  #recapCanvas{display:none;width:100%;max-width:420px;border-radius:14px;margin-top:12px}
+  #recapActions{display:none;gap:8px;flex-wrap:wrap;margin-top:10px}
+  input[type=number]{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%;font:inherit;font-size:16px}
+  .goal{margin-bottom:14px}
+  .goal-head{display:flex;justify-content:space-between;gap:10px}
+  .goal .progress{margin-top:6px}
+  .goal-mini{cursor:pointer}
+  .goal-mini .goal{margin-bottom:10px}
+  /* ===== À venir ===== */
+  .fchip{border-radius:999px;padding:7px 14px;font-weight:600;color:var(--muted)}
+  .fchip.on{background:var(--accent);border-color:var(--accent);color:var(--on)}
+  .up-date{font-weight:700;margin:18px 0 8px;color:#c7d2fe}
+  .up-date small{color:var(--muted);font-weight:500;margin-left:6px}
+  .up-row{display:grid;grid-template-columns:56px 1fr;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px}
+  .up-row img{width:56px;aspect-ratio:2/3;object-fit:cover;border-radius:8px;background:#1f2937}
+  .up-row.mine{border-color:color-mix(in srgb,var(--accent) 60%,transparent)}
+  .up-title{font-weight:600}
+  /* 8 onglets en bas : on resserre sur petit écran */
+  @media (max-width:420px){
+    #mainTabs{gap:0;padding-left:2px;padding-right:2px}
+    #mainTabs .tab-btn{font-size:9px;letter-spacing:-.2px;border-radius:10px}
+    #mainTabs .tab-btn i{font-size:18px}
+  }
+</style>
+<script>
+try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){var r=document.documentElement.style;r.setProperty('--accent',a);var n=parseInt(a.slice(1),16),l=(0.299*(n>>16)+0.587*((n>>8)&255)+0.114*(n&255));r.setProperty('--on',l>150?'#0d1a12':'#ffffff');}}catch(e){}
+</script>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="logo">Cl<span>ap</span> 🎬</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- DÉCOUVRIR -->
+  <section id="discover" class="tab-content active">
+    <div class="section search-wrap">
+      <input id="searchInput" type="text" placeholder="Rechercher un film, une série, un acteur…" autocomplete="off"
+             oninput="handleSearchInput()" onkeydown="handleSearchKeydown(event)">
+      <div id="searchSuggestions"></div>
+    </div>
+    <div id="searchResults"></div>
+
+    <div id="hello"></div>
+    <div id="goalsMini"></div>
+    <div id="resume"></div>
+    <div id="reminders"></div>
+    <label class="toggleRow"><input type="checkbox" class="onlyMineToggle" onchange="toggleOnlyMine(this.checked)"> 📺 Seulement mes plateformes</label>
+
+    <div class="section">
+      <div class="row" style="margin-bottom:12px"><h2 style="margin:0;flex:1">✨ Pour toi</h2><button onclick="loadRecommendations(true)">↻ Autres idées</button></div>
+      <div id="recoList" class="home-grid"></div>
+    </div>
+
+    <div class="section"><h2>🔥 Films tendance</h2><div id="trendingMovies" class="home-grid"></div></div>
+    <div class="section"><h2>📺 Séries tendance</h2><div id="trendingSeries" class="home-grid"></div></div>
+    <div class="section"><h2>🆕 Nouveaux films</h2><div id="newMovies" class="home-grid"></div></div>
+    <div class="section"><h2>🆕 Nouvelles séries</h2><div id="newSeries" class="home-grid"></div></div>
+    <div class="section"><h2>🎌 Animes populaires</h2><div id="animeSeries" class="home-grid"></div></div>
+    <div class="section"><h2>🎞️ Films d’animation japonais</h2><div id="animeMovies" class="home-grid"></div></div>
+    <div class="section">
+      <div class="row" style="margin-bottom:6px"><h2 style="margin:0;flex:1">🏛️ Classiques (AFI 100)</h2><select id="afiCat" onchange="loadAFI()" style="width:auto"></select></div>
+      <p id="afiInfo" class="small" style="margin:0 0 10px"></p>
+      <div id="afiList" class="home-grid"></div>
+    </div>
+  </section>
+
+  <!-- VUS -->
+  <section id="watched" class="tab-content">
+    <div class="row section">
+      <h2 style="margin:0;flex:1">📖 Journal</h2>
+      <span class="vtoggle row" style="gap:4px"><button data-act="wview" data-v="journal">Journal</button><button data-act="wview" data-v="list">Liste</button></span>
+      <select id="watchedSort" onchange="renderWatched()" style="width:auto">
+        <option value="addedAt">Plus récents</option>
+        <option value="title">Titre A→Z</option>
+        <option value="rating">Ma note</option>
+      </select>
+    </div>
+    <div id="watchedList"></div>
+  </section>
+
+  <!-- À VOIR + LISTES -->
+  <section id="watchlist-tab" class="tab-content">
+    <div class="row section">
+      <h2 style="margin:0;flex:1">📝 À voir</h2>
+      <select id="watchlistSort" onchange="renderWatchlist()" style="width:auto">
+        <option value="addedAt">Plus récents</option>
+        <option value="title">Titre A→Z</option>
+        <option value="rating">Envie</option>
+      </select>
+      <button class="primary" onclick="pickRandomFromWatchlist()">🎲 Au hasard</button>
+    </div>
+    <div class="row section" style="margin-top:-12px">
+      <label class="toggleRow" style="flex:1"><input type="checkbox" class="onlyMineToggle" onchange="toggleOnlyMine(this.checked)"> 📺 Seulement mes plateformes</label>
+      <button onclick="shareList('watchlist')">🔗 Partager ma watchlist</button>
+    </div>
+    <div id="watchlistRandomResult" class="section"></div>
+    <div id="watchlist"></div>
+
+    <div class="card section" style="margin-top:28px">
+      <h2>👥 Choisir à plusieurs</h2>
+      <p class="small">Chacun son tour, on se passe le téléphone et on vote. Le film le plus voté gagne.</p>
+      <label>Parmi quelle liste ?</label>
+      <select id="voteSource"></select>
+      <label>Les prénoms (séparés par des virgules)</label>
+      <input id="votePlayers" type="text" placeholder="Léa, Tom, Sam">
+      <label>Nombre de films proposés</label>
+      <select id="voteCount"><option value="4">4</option><option value="6" selected>6</option><option value="8">8</option></select>
+      <div class="buttons"><button class="primary" onclick="startVote()">Lancer le vote</button></div>
+    </div>
+
+    <div class="section">
+      <h2>🗂️ Mes listes</h2>
+      <div class="row" style="margin-bottom:12px">
+        <input id="customListName" type="text" placeholder="Nom de la nouvelle liste" style="flex:1;width:auto">
+        <button class="primary" onclick="createCustomList()">Créer</button>
+      </div>
+      <div id="customLists"></div>
+    </div>
+  </section>
+
+  <!-- SÉRIES -->
+  <section id="series" class="tab-content">
+    <div id="seriesPanel-mine" class="series-panel active" style="display:block">
+      <select id="seriesFilter" onchange="renderSeries()" style="width:auto;margin-bottom:12px">
+        <option value="all">Séries et animes</option>
+        <option value="series">Séries</option>
+        <option value="anime">🎌 Animes</option>
+      </select>
+      <div id="seriesList"></div>
+    </div>
+  </section>
+
+  <!-- À VENIR -->
+  <section id="upcoming" class="tab-content">
+    <h2>📅 À venir</h2>
+    <div id="upFilters" class="row" style="margin-bottom:10px">
+      <button class="fchip" data-act="upFilter" data-v="all">Tout</button>
+      <button class="fchip" data-act="upFilter" data-v="movie">🎬 Films</button>
+      <button class="fchip" data-act="upFilter" data-v="series">📺 Séries</button>
+      <button class="fchip" data-act="upFilter" data-v="anime">🎌 Animes</button>
+    </div>
+    <div class="row section">
+      <select id="upRange" onchange="setUpcoming()" style="width:auto">
+        <option value="30">30 jours</option>
+        <option value="90">3 mois</option>
+        <option value="180">6 mois</option>
+      </select>
+      <label class="toggleRow" style="margin:0"><input type="checkbox" id="upMine" onchange="setUpcoming()"> Seulement ma liste et mes séries</label>
+    </div>
+    <div id="upcomingList"></div>
+  </section>
+
+  <!-- HASARD -->
+  <section id="random" class="tab-content">
+    <div class="card section">
+      <h2>🎲 Que regarder ?</h2>
+      <label>Mode</label>
+      <select id="randomMode" onchange="toggleRandomMode()">
+        <option value="genre">Par genre</option>
+        <option value="actor">Par acteur</option>
+      </select>
+
+      <div id="genreBlock"><label>Genre</label><select id="genreSelect"></select></div>
+      <div id="actorBlock" style="display:none">
+        <label>Acteur</label>
+        <div class="row">
+          <input id="actorInput" type="text" placeholder="Nom de l'acteur" style="flex:1;width:auto">
+          <button onclick="searchActor()">Chercher</button>
+        </div>
+        <div id="actorResults" style="margin-top:8px"></div>
+      </div>
+
+      <div class="grid2">
+        <div><label>Décennie</label>
+          <select id="decadeSelect">
+            <option value="">Toutes</option><option value="2020">2020s</option><option value="2010">2010s</option>
+            <option value="2000">2000s</option><option value="1990">1990s</option><option value="1980">1980s</option>
+            <option value="1970">1970s</option>
+          </select></div>
+        <div><label>Note minimale</label>
+          <select id="minRatingSelect">
+            <option value="0">Peu importe</option><option value="6">6+</option><option value="7">7+</option><option value="8">8+</option>
+          </select></div>
+        <div><label>Durée maximale</label>
+          <select id="maxRuntimeSelect">
+            <option value="0">Peu importe</option><option value="90">1h30</option><option value="120">2h</option><option value="150">2h30</option>
+          </select></div>
+      </div>
+
+      <label class="toggleRow"><input type="checkbox" class="onlyMineToggle" onchange="toggleOnlyMine(this.checked)"> 📺 Seulement mes plateformes</label>
+      <div class="buttons">
+        <button class="primary" onclick="pickRandomMovie()">Tirer un film</button>
+        <button onclick="pickMovieOfTheNight()">🎬 Film du soir</button>
+      </div>
+    </div>
+    <div id="randomResult" class="section"></div>
+    <div id="movieOfTheNightResult"></div>
+  </section>
+
+  <!-- STATS -->
+  <section id="stats" class="tab-content">
+    <h2>📊 Statistiques</h2>
+    <div class="card section">
+      <h3>🎯 Mes objectifs <span id="goalYear"></span></h3>
+      <p class="small">Mets 0 pour désactiver un objectif. Séries et animes comptent les épisodes vus cette année (à partir d’aujourd’hui).</p>
+      <div class="grid2">
+        <div><label>🎬 Films</label><input id="goalFilms" type="number" min="0" inputmode="numeric" placeholder="ex. 500" onchange="setGoal()"></div>
+        <div><label>📺 Épisodes de séries</label><input id="goalSeries" type="number" min="0" inputmode="numeric" placeholder="ex. 200" onchange="setGoal()"></div>
+        <div><label>🎌 Épisodes d’animes</label><input id="goalAnime" type="number" min="0" inputmode="numeric" placeholder="ex. 300" onchange="setGoal()"></div>
+      </div>
+      <div id="goalsBars" style="margin-top:12px"></div>
+    </div>
+    <div class="grid2 section">
+      <div class="card stat"><b id="statsFilms">0</b><span class="small">Films vus</span></div>
+      <div class="card stat"><b id="statsATvoir">0</b><span class="small">À voir</span></div>
+      <div class="card stat"><b id="statsSeries">0</b><span class="small">Séries suivies</span></div>
+      <div class="card stat"><b id="statsEpisodes">0</b><span class="small">Épisodes vus</span></div>
+      <div class="card stat"><b id="seriesOngoing">0</b><span class="small">Séries en cours</span></div>
+      <div class="card stat"><b id="seriesFinished">0</b><span class="small">Séries terminées</span></div>
+      <div class="card stat"><b id="statsRating">-</b><span class="small">Note moyenne</span></div>
+    </div>
+    <div class="grid2 section">
+      <div class="card"><h3>Genres</h3><div class="chart-box"><canvas id="genreChart"></canvas></div></div>
+      <div class="card"><h3>Mes notes</h3><div class="chart-box"><canvas id="ratingChart"></canvas></div></div>
+    </div>
+    <div class="card section">
+      <h3>🎞️ Mon bilan</h3>
+      <p class="small">Une image à partager avec tes stats, tes genres et tes coups de cœur.</p>
+      <div class="row">
+        <select id="recapYear" style="width:auto"></select>
+        <button class="primary" onclick="generateRecap()">Générer mon bilan</button>
+      </div>
+      <canvas id="recapCanvas"></canvas>
+      <div id="recapActions">
+        <button onclick="downloadRecap()">⬇️ Télécharger</button>
+        <button class="primary" onclick="shareRecap()">📤 Partager</button>
+      </div>
+    </div>
+    <div class="card"><h3>🏅 Badges</h3><p class="small">Touche un badge pour voir l'objectif.</p><div id="statsBadges"></div></div>
+  </section>
+
+  <!-- PROFIL -->
+  <section id="profile" class="tab-content">
+    <div class="card section">
+      <div class="row">
+        <img id="displayAvatar" alt="Avatar" style="display:none">
+        <div><h2 id="displayName" style="margin:0">Anonyme</h2><div id="profileBadges" style="margin-top:6px"></div></div>
+      </div>
+      <label>Pseudo</label>
+      <input id="profileName" type="text" placeholder="Ton pseudo" onchange="updateProfile()" oninput="updateProfile()">
+      <label>Photo de profil</label>
+      <input id="profileAvatarFile" type="file" accept="image/*" onchange="handleAvatarUpload()">
+      <label style="display:flex;gap:10px;align-items:center;margin-top:16px;color:var(--text);font-size:15px">
+        <input type="checkbox" id="soundToggle" onchange="toggleSound()" style="width:auto"> 🔔 Cloche quand un badge se débloque
+      </label>
+    </div>
+
+    <div class="grid2 section">
+      <div class="card stat"><b id="favoriteMoviesCount">0</b><span class="small">Films favoris</span></div>
+      <div class="card stat"><b id="favoriteSeriesCount">0</b><span class="small">Séries favorites</span></div>
+      <div class="card stat"><b id="favoritePeopleCount">0</b><span class="small">Acteurs favoris</span></div>
+    </div>
+    <div class="section"><h3>🎭 Acteurs favoris</h3><div id="favoritePeopleList"></div></div>
+
+    <div class="card section">
+      <h3>📺 Mes plateformes</h3>
+      <p class="small">Choisis tes abonnements : tu verras ce qui est dispo chez toi, et tu pourras filtrer.</p>
+      <div id="providerPicker"></div>
+    </div>
+
+    <div class="card section">
+      <h3>🔔 Rappels</h3>
+      <label class="toggleRow"><input type="checkbox" id="notifToggle" onchange="toggleNotif(this.checked)"> Me prévenir des sorties (aujourd’hui / demain)</label>
+      <p class="small">Les rappels s’affichent dans l’appli, et en notification quand tu l’ouvres. Pour les recevoir appli fermée, il faudrait un serveur.</p>
+    </div>
+
+    <div class="card section">
+      <h3>🤝 Partager mes goûts</h3>
+      <p class="small">Envoie un lien à un ami : il verra votre compatibilité et les films que tu as adorés.</p>
+      <div class="buttons"><button class="primary" onclick="shareTaste()">🔗 Partager mon profil ciné</button></div>
+    </div>
+
+    <div class="card section">
+      <h3>📥 Importer de Letterboxd</h3>
+      <p class="small">Sur Letterboxd : Paramètres → Import & Export → Exporter. Choisis ici <b>watched.csv</b>, <b>ratings.csv</b> et/ou <b>watchlist.csv</b> (ou un CSV avec colonnes Name / Year / Rating).</p>
+      <input id="csvFiles" type="file" accept=".csv,text/csv" multiple onchange="importCSV(this)">
+      <div id="importStatus" class="small" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card section">
+      <h3>📤 Exporter vers Letterboxd</h3>
+      <p class="small">Télécharge un CSV, puis sur Letterboxd : <b>letterboxd.com/import</b> → choisis le fichier. La watchlist s'importe comme liste (puis coche « Ajouter à ma watchlist » si proposé, ou utilise-la comme liste). Seuls les films sont exportés (pas les séries).</p>
+      <div class="buttons">
+        <button class="primary" onclick="exportLetterboxd('watchlist')">📋 Ma watchlist</button>
+        <button onclick="exportLetterboxd('watched')">🎞️ Mes films vus</button>
+        <button onclick="exportPosters('watchlist')">🖼️ Watchlist avec affiches</button>
+        <button onclick="exportPosters('watched')">🖼️ Vus avec affiches</button>
+      </div>
+    </div>
+
+    <div class="card section">
+      <h3>🎨 Couleur de l’appli</h3>
+      <p class="small">Choisis la couleur des boutons et des accents.</p>
+      <div class="swatches" id="swatches"></div>
+    </div>
+
+    <div class="card section">
+      <h3>🧹 Nettoyer mes données</h3>
+      <p class="small">Un souci après un import ? Tu peux tout vider, ou revenir en arrière juste après.</p>
+      <div class="buttons">
+        <button type="button" data-act="clearWatchlist">🗑️ Vider ma watchlist</button>
+        <button type="button" data-act="clearWatched">🗑️ Vider mes films vus</button>
+      </div>
+      <div id="undoBox" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <h3>💾 Sauvegarde</h3>
+      <p class="small">Tes données sont stockées dans ce navigateur. Exporte-les pour ne rien perdre.</p>
+      <div class="buttons">
+        <button class="primary" onclick="exportData()">Exporter</button>
+      </div>
+      <label>Importer une sauvegarde</label>
+      <input type="file" accept=".json" onchange="importData(this)">
+    </div>
+  </section>
+
+</main>
+
+<nav id="mainTabs">
+  <button class="tab-btn active" data-tab="discover" onclick="showTab('discover', this)"><i>🔥</i>Découvrir</button>
+  <button class="tab-btn" data-tab="watched" onclick="showTab('watched', this)"><i>✅</i>Vus</button>
+  <button class="tab-btn" data-tab="watchlist-tab" onclick="showTab('watchlist-tab', this)"><i>📝</i>À voir</button>
+  <button class="tab-btn" data-tab="series" onclick="showTab('series', this)"><i>📺</i>Séries</button>
+  <button class="tab-btn" data-tab="upcoming" onclick="showTab('upcoming', this)"><i>📅</i>À venir</button>
+  <button class="tab-btn" data-tab="random" onclick="showTab('random', this)"><i>🎲</i>Hasard</button>
+  <button class="tab-btn" data-tab="stats" onclick="showTab('stats', this)"><i>📊</i>Stats</button>
+  <button class="tab-btn" data-tab="profile" onclick="showTab('profile', this)"><i>👤</i>Profil</button>
+</nav>
+
+
+<!-- MODALES -->
+<div id="appModal" class="modal">
+  <div class="modal-box">
+    <button class="close" onclick="closeAppModal()">✕</button>
+    <div id="appModalContent"></div>
+  </div>
+</div>
+
+<div id="detailsModal" class="modal">
+  <div class="modal-box">
+    <button class="close" onclick="closeDetailsModal()">✕</button>
+    <div id="detailsContent"></div>
+  </div>
+</div>
+
+<div id="badgeModal" class="modal">
+  <div class="modal-box" style="max-width:420px">
+    <button class="close" onclick="closeBadgeModal()">✕</button>
+    <h3 id="badgeTitle"></h3>
+    <p id="badgeDescription" class="small"></p>
+  </div>
+</div>
+
+<p class="small" style="text-align:center;padding:18px 16px 90px;opacity:.7">Clap — tes films, tes séries, ton journal.<br>Ce produit utilise l’API TMDB mais n’est ni soutenu ni certifié par TMDB.</p>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="clap.js"></script>
+<script src="clap-plus.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+</script>
+</body>
+</html>

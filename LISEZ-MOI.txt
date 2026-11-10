@@ -1,0 +1,14 @@
+CLAP - ton carnet de cinéma
+
+SUR PC
+1. Clic droit sur le zip > "Extraire tout".
+2. Double-clique sur index.html : Clap s'ouvre dans ton navigateur (internet nécessaire).
+
+SUR TÉLÉPHONE
+Ouvrir le fichier directement ne marche pas bien. Il faut passer par un lien en ligne,
+puis dans le menu de Chrome : "Ajouter à l'écran d'accueil".
+
+TES DONNÉES
+Elles restent dans ton navigateur (rien n'est envoyé à personne).
+Pense à faire une sauvegarde de temps en temps : Profil > Sauvegarde > Exporter.
+Tu peux aussi importer tes films depuis Letterboxd (Profil > Importer de Letterboxd).
