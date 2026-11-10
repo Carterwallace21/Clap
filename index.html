@@ -109,11 +109,11 @@
   body{-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
   header{padding-top:env(safe-area-inset-top)}
   .bar{padding-bottom:10px}
-  main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+  main{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
   input,select{font-size:16px}
   button{touch-action:manipulation}
-  #mainTabs{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;gap:2px;background:rgba(20,26,46,.97);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
-  #mainTabs .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:10px;font-weight:600;border:0;border-radius:12px;background:transparent;color:var(--muted)}
+  #mainTabs{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;gap:2px;background:rgba(0,0,0,.97);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:10px 6px calc(12px + env(safe-area-inset-bottom))}
+  #mainTabs .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:52px;padding:10px 0;font-size:13px;font-weight:700;border:0;border-radius:12px;background:transparent;color:var(--muted)}
   #mainTabs .tab-btn i{font-style:normal;font-size:20px;line-height:1}
   #mainTabs .tab-btn.active{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
 
@@ -156,7 +156,7 @@
   /* 8 onglets en bas : on resserre sur petit écran */
   @media (max-width:420px){
     #mainTabs{gap:0;padding-left:2px;padding-right:2px}
-    #mainTabs .tab-btn{font-size:9px;letter-spacing:-.2px;border-radius:10px}
+    #mainTabs .tab-btn{font-size:11.5px;letter-spacing:-.2px;border-radius:10px;min-height:54px}
     #mainTabs .tab-btn i{font-size:18px}
   }
 </style>
@@ -464,7 +464,7 @@
 </main>
 
 <nav id="mainTabs">
-  <button class="tab-btn active" data-tab="discover" onclick="showTab('discover', this)">Découvrir</button>
+  <button class="tab-btn active" data-tab="discover" onclick="showTab('discover', this)">Accueil</button>
   <button class="tab-btn" data-tab="watched" onclick="showTab('watched', this)">Vus</button>
   <button class="tab-btn" data-tab="watchlist-tab" onclick="showTab('watchlist-tab', this)">À voir</button>
   <button class="tab-btn" data-tab="series" onclick="showTab('series', this)">Séries</button>
