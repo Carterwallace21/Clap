@@ -1,4 +1,4 @@
-const CACHE = 'clap-v25';
+const CACHE = 'clap-v27';
 const EXT = 'nw-ext';
 const SHELL = ['./', 'index.html', 'clap.js', 'clap-plus.js', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 

@@ -6,6 +6,7 @@
 
 const IMG = 'https://image.tmdb.org/t/p/w500';
 // Clé v3 (courte) OU "Read Access Token" v4 (long, envoyé en Bearer)
+const CLAP_VERSION = 27; // doit être identique dans clap-plus.js
 const TMDB_KEY = 'f1de9e030815c6b8ffcc131f2d144956';
 
 const GENRES = [
@@ -484,7 +485,7 @@ async function loadHomeSections() {
     console.error(err);
     ['trendingMovies', 'trendingSeries', 'newMovies', 'newSeries'].forEach(id => {
       const el = $(id);
-      if (el) el.innerHTML = '<div class="empty">Impossible de charger.</div>';
+      if (el) el.innerHTML = `<div class="empty">Impossible de joindre TMDB (${esc(err?.message || 'réseau')}).<br>Vérifie ta connexion, ton DNS privé ou ton bloqueur de pubs.<br><button type="button" class="primary" data-act="retryHome" style="margin-top:8px">↻ Réessayer</button></div>`;
     });
   } finally {
     homeLoading = false;
@@ -1531,6 +1532,7 @@ const ACTIONS = {
   badge: d => showBadgeDetails(d.name),
   pickSuggestion: d => pickSuggestion(d.title),
   rmRecent: d => removeRecent(d.q),
+  retryHome: () => { homeLoaded = false; loadHomeSections(); },
   selectActor: d => selectActor({ id: +d.id, name: d.name })
 };
 
@@ -1558,9 +1560,20 @@ document.addEventListener('keydown', e => {
 });
 
 /* ---------- Démarrage ---------- */
+function versionBanner() {
+  if (window.CLAP_PLUS_VERSION === CLAP_VERSION) return;
+  const d = document.createElement('div');
+  d.style.cssText = 'background:#b45309;color:#fff;padding:10px 14px;font-size:14px;text-align:center';
+  d.textContent = window.CLAP_PLUS_VERSION
+    ? '⚠️ Fichiers de versions différentes : remplace TOUS les fichiers du site (index.html, clap.js, clap-plus.js, sw.js…) puis recharge avec Ctrl+F5.'
+    : '⚠️ Le fichier clap-plus.js est introuvable ou cassé : envoie-le au même endroit que index.html puis recharge avec Ctrl+F5.';
+  document.body.prepend(d);
+}
+
 function init() {
+  versionBanner();
   fillGenres();
-  renderAll();
+  try { renderAll(); } catch (e) { console.error('renderAll', e); }
   loadHomeSections();
   toggleRandomMode();
   if ($('profileName')) $('profileName').value = userProfile.name || '';
