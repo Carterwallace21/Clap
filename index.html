@@ -51,9 +51,20 @@
 
   /* recherche */
   .search-wrap{position:relative}
+  .search-wrap input{border-radius:999px;padding-left:42px;padding-right:44px}
+  .search-ico{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.7;pointer-events:none}
+  .search-clear{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;padding:0;border-radius:50%;border:none;background:var(--panel2);color:var(--text);font-size:13px;line-height:1}
+  .search-wrap.has-text .search-clear{display:block}
+  .search-suggestion-item.active,.search-suggestion-item:hover{background:var(--panel2)}
+  .sug-grow{flex:1;min-width:0}.sug-grow .suggestion-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sug-typed{font-weight:400;color:var(--muted)}.suggestion-title b{font-weight:700}
+  .sug-ico{width:36px;text-align:center;opacity:.7}.sug-go{opacity:.5;padding-left:6px}
+  .sug-x{width:28px;height:28px;padding:0;border-radius:50%;border:none;background:transparent;color:var(--muted)}
   #searchSuggestions{display:none;position:absolute;left:0;right:0;top:100%;margin-top:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.5)}
   .search-suggestion-item{padding:10px 14px;cursor:pointer}
   .search-suggestion-item:hover{background:var(--panel2)}
+  .sug-row{display:flex;align-items:center;gap:10px}
+  .sug-img{width:36px;height:54px;object-fit:cover;border-radius:5px;background:#1f2937;flex:0 0 auto}.sug-img.round{border-radius:50%;width:44px;height:44px}
   .suggestion-meta{color:var(--muted);font-size:12px}
   #searchResults{display:grid;gap:12px;margin-top:14px}
 
@@ -168,9 +179,11 @@ try{var a=localStorage.getItem('cine_accent');if(a&&/^#[0-9a-f]{6}$/i.test(a)){v
 
   <!-- DÉCOUVRIR -->
   <section id="discover" class="tab-content active">
-    <div class="section search-wrap">
-      <input id="searchInput" type="text" placeholder="Rechercher un film, une série, un acteur…" autocomplete="off"
-             oninput="handleSearchInput()" onkeydown="handleSearchKeydown(event)">
+    <div class="section search-wrap" id="searchWrap">
+      <span class="search-ico" aria-hidden="true">🔍</span>
+      <input id="searchInput" type="text" placeholder="Rechercher un film, une série, un acteur…" autocomplete="off" enterkeyhint="search"
+             oninput="handleSearchInput()" onfocus="showRecents()" onkeydown="handleSearchKeydown(event)">
+      <button type="button" id="searchClear" class="search-clear" onclick="clearSearch()" aria-label="Effacer la recherche">✕</button>
       <div id="searchSuggestions"></div>
     </div>
     <div id="searchResults"></div>

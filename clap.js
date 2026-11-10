@@ -264,15 +264,60 @@ function toggleRandomMode() {
   if ($('actorBlock')) $('actorBlock').style.display = mode === 'actor' ? 'block' : 'none';
 }
 
-/* ---------- Recherche ---------- */
+/* ---------- Recherche (façon YouTube) ---------- */
+let searchActive = -1;
+let searchTyped = '';
+let recentSearches = getStorage('cine_recent', []);
+
 function hideSuggestions() {
   const box = $('searchSuggestions');
   if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+  searchActive = -1;
+}
+
+function saveRecent(q) {
+  recentSearches = [q, ...recentSearches.filter(x => x.toLowerCase() !== q.toLowerCase())].slice(0, 8);
+  setStorage('cine_recent', recentSearches);
+}
+
+function showRecents() {
+  const box = $('searchSuggestions');
+  const q = $('searchInput')?.value.trim() || '';
+  if (!box || q || !recentSearches.length) return;
+  searchActive = -1;
+  box.innerHTML = recentSearches.map(r => `
+    <div class="search-suggestion-item sug-row" data-act="pickSuggestion" data-title="${esc(r)}">
+      <span class="sug-ico">🕘</span>
+      <div class="sug-grow"><div class="suggestion-title">${esc(r)}</div></div>
+      <button type="button" class="sug-x" data-act="rmRecent" data-q="${esc(r)}" aria-label="Supprimer de l’historique">✕</button>
+    </div>`).join('');
+  box.style.display = 'block';
+}
+
+function removeRecent(q) {
+  recentSearches = recentSearches.filter(x => x !== q);
+  setStorage('cine_recent', recentSearches);
+  showRecents();
+  if (!recentSearches.length) hideSuggestions();
+}
+
+function clearSearch() {
+  const input = $('searchInput');
+  if (input) { input.value = ''; input.focus(); }
+  searchSeq++;
+  clearTimeout(searchSuggestTimeout);
+  $('searchWrap')?.classList.remove('has-text');
+  if ($('searchResults')) $('searchResults').innerHTML = '';
+  hideSuggestions();
+  showRecents();
 }
 
 function handleSearchInput() {
   const q = $('searchInput')?.value.trim() || '';
+  searchTyped = $('searchInput')?.value || '';
+  $('searchWrap')?.classList.toggle('has-text', !!searchTyped);
   clearTimeout(searchSuggestTimeout);
+  if (q.length < 1) { hideSuggestions(); showRecents(); return; }
   if (q.length < 2) { hideSuggestions(); return; }
 
   const seq = ++searchSeq;
@@ -282,25 +327,40 @@ function handleSearchInput() {
       if (seq !== searchSeq) return; // réponse périmée
       const results = (data.results || [])
         .filter(r => ['movie', 'tv', 'person'].includes(r.media_type))
-        .slice(0, 6);
-      renderSuggestions(results);
+        .slice(0, 7);
+      renderSuggestions(results, q);
     } catch { hideSuggestions(); }
-  }, 250);
+  }, 180);
 }
 
-function renderSuggestions(results) {
+// Partie tapée en normal, suite proposée en gras (comme YouTube)
+function highlightTitle(title, q) {
+  const t = String(title), ql = q.toLowerCase();
+  const i = t.toLowerCase().indexOf(ql);
+  if (i === -1) return esc(t);
+  return `${esc(t.slice(0, i))}<span class="sug-typed">${esc(t.slice(i, i + q.length))}</span><b>${esc(t.slice(i + q.length))}</b>`.replace(/<b><\/b>/, '');
+}
+
+function renderSuggestions(results, q = '') {
   const box = $('searchSuggestions');
   if (!box) return;
   if (!results.length) { hideSuggestions(); return; }
+  searchActive = -1;
 
   box.innerHTML = results.map(item => {
     const title = titleOf(item);
     const hasDate = item.release_date || item.first_air_date;
     const meta = `${mediaTypeLabel(item.media_type)}${hasDate ? ' · ' + yearOf(item) : ''}`;
+    const isPerson = item.media_type === 'person';
+    const img = poster(isPerson ? item.profile_path : item.poster_path);
     return `
-      <div class="search-suggestion-item" data-act="pickSuggestion" data-title="${esc(title)}">
-        <div class="suggestion-title">${esc(title)}</div>
-        <div class="suggestion-meta">${esc(meta)}</div>
+      <div class="search-suggestion-item sug-row" data-act="pickSuggestion" data-title="${esc(title)}">
+        <img class="sug-img${isPerson ? ' round' : ''}" loading="lazy" src="${img}" alt="">
+        <div class="sug-grow">
+          <div class="suggestion-title">${highlightTitle(title, q)}</div>
+          <div class="suggestion-meta">${esc(meta)}</div>
+        </div>
+        <span class="sug-go" aria-hidden="true">↖</span>
       </div>`;
   }).join('');
   box.style.display = 'block';
@@ -309,12 +369,28 @@ function renderSuggestions(results) {
 function pickSuggestion(title) {
   const input = $('searchInput');
   if (input) input.value = title;
+  $('searchWrap')?.classList.toggle('has-text', !!title);
   hideSuggestions();
   searchContent();
 }
 
+function moveActive(dir) {
+  const rows = [...document.querySelectorAll('#searchSuggestions .search-suggestion-item')];
+  if (!rows.length) return;
+  searchActive = (searchActive + dir + rows.length + 1) % (rows.length + 1);
+  if (searchActive === rows.length) searchActive = -1; // retour à ce que l'utilisateur a tapé
+  rows.forEach((r, i) => r.classList.toggle('active', i === searchActive));
+  const input = $('searchInput');
+  if (input) input.value = searchActive === -1 ? searchTyped : rows[searchActive].dataset.title;
+  rows[searchActive]?.scrollIntoView({ block: 'nearest' });
+}
+
 function handleSearchKeydown(event) {
-  if (event.key === 'Enter') {
+  const open = $('searchSuggestions')?.style.display === 'block';
+  if (event.key === 'ArrowDown' && open) { event.preventDefault(); moveActive(1); }
+  else if (event.key === 'ArrowUp' && open) { event.preventDefault(); moveActive(-1); }
+  else if (event.key === 'Escape') { hideSuggestions(); }
+  else if (event.key === 'Enter') {
     event.preventDefault();
     hideSuggestions();
     searchContent();
@@ -325,6 +401,7 @@ async function searchContent() {
   const q = $('searchInput')?.value.trim() || '';
   if (!q) return;
   hideSuggestions();
+  saveRecent(q);
 
   const box = $('searchResults');
   if (!box) return;
@@ -1453,6 +1530,7 @@ const ACTIONS = {
   epRate: d => rateEpisode(+d.sid, +d.season, +d.ep, +d.n),
   badge: d => showBadgeDetails(d.name),
   pickSuggestion: d => pickSuggestion(d.title),
+  rmRecent: d => removeRecent(d.q),
   selectActor: d => selectActor({ id: +d.id, name: d.name })
 };
 
